@@ -226,6 +226,11 @@ app.post('/:id/enviar-link-pais', requirePerfil('servicosocial'), async (c) => {
       id
     ).run();
     
+    // Salvar token no KV Store para validação
+    await c.env.SESSIONS.put(`aprovacao_pais:${token}`, id, {
+      expirationTtl: 7 * 24 * 60 * 60 // 7 dias em segundos
+    });
+    
     // Gerar mensagem WhatsApp
     const telefone = solicitacao.telefone_responsavel.replace(/\D/g, '');
     const mensagem = encodeURIComponent(
