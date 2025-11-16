@@ -16,7 +16,11 @@ const app = new Hono<{ Bindings: Env }>();
 
 // Configurar CORS
 app.use('/*', cors({
-  origin: '*', // Em produção, especificar domínio do frontend
+  origin: [
+    'https://sistema-autorizacoes-sc.pages.dev',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length'],

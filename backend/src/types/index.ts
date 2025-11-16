@@ -24,6 +24,7 @@ export interface Usuario {
 
 export interface Solicitacao {
   id: string;
+  codigo_unico: string;
   atleta_id: string;
   nome: string;
   email: string;
@@ -47,6 +48,8 @@ export interface Solicitacao {
   observacao_pais?: string;
   aprovado_pais_em?: string;
   link_aprovacao_pais?: string;
+  token_pais?: string;
+  token_pais_expira_em?: string;
   
   status_servico_social: StatusAprovacao;
   observacao_servico_social?: string;

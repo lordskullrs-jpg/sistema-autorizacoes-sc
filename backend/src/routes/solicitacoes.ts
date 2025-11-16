@@ -178,10 +178,10 @@ app.put('/:id/supervisor', requirePerfil('supervisor'), async (c) => {
 });
 
 /**
- * POST /api/solicitacoes/:id/enviar-pais
+ * POST /api/solicitacoes/:id/enviar-link-pais
  * Gera link para enviar aos pais (Serviço Social)
  */
-app.post('/:id/enviar-pais', requirePerfil('servicosocial'), async (c) => {
+app.post('/:id/enviar-link-pais', requirePerfil('servicosocial'), async (c) => {
   try {
     const id = c.req.param('id');
     

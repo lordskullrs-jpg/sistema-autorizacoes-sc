@@ -61,7 +61,7 @@ export function requirePerfil(...perfisPermitidos: string[]) {
 /**
  * Middleware para verificar categoria (supervisores)
  */
-export function requireCategoria(c: Context<{ Bindings: Env; Variables: AuthContext }>, next: Next) {
+export async function requireCategoria(c: Context<{ Bindings: Env; Variables: AuthContext }>, next: Next) {
   const user = c.get('user');
 
   if (!user) {
@@ -72,5 +72,5 @@ export function requireCategoria(c: Context<{ Bindings: Env; Variables: AuthCont
     return c.json({ error: 'Supervisor sem categoria definida' }, 403);
   }
 
-  return next();
+  await next();
 }
