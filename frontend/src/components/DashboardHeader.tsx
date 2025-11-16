@@ -3,11 +3,11 @@ import { useAuth } from '../contexts/AuthContext';
 import '../styles/dashboard.css';
 
 interface DashboardHeaderProps {
-  title: string;
+  title?: string;
   userName?: string;
 }
 
-export default function DashboardHeader({ title, userName }: DashboardHeaderProps) {
+export default function DashboardHeader({ userName }: DashboardHeaderProps) {
   const navigate = useNavigate();
   const { logout } = useAuth();
 

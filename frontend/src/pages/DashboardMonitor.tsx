@@ -28,7 +28,7 @@ interface Solicitacao {
 }
 
 export default function DashboardMonitor() {
-  const { token, user } = useAuth();
+  const { token, usuario } = useAuth();
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
@@ -161,7 +161,7 @@ export default function DashboardMonitor() {
   if (solicitacaoSelecionada) {
     return (
       <div className="dashboard-container">
-        <DashboardHeader title="Controle de Saída/Retorno" userName={user?.nome || 'Monitor'} />
+        <DashboardHeader title="Controle de Saída/Retorno" userName={usuario?.nome || 'Monitor'} />
 
         <div className="dashboard-main">
           <button 
@@ -306,7 +306,7 @@ export default function DashboardMonitor() {
 
   return (
     <div className="dashboard-container">
-      <DashboardHeader title="Painel do Monitor" userName={user?.nome || 'Monitor'} />
+      <DashboardHeader title="Painel do Monitor" userName={usuario?.nome || 'Monitor'} />
 
       <div className="dashboard-main">
         <DashboardCard title="👋 Bem-vindo, Monitor!">

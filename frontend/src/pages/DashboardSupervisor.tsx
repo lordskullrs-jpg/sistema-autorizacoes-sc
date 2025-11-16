@@ -29,7 +29,7 @@ interface Solicitacao {
 }
 
 export default function DashboardSupervisor() {
-  const { token, user } = useAuth();
+  const { token, usuario } = useAuth();
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
@@ -61,7 +61,7 @@ export default function DashboardSupervisor() {
 
       // Filtrar apenas solicitações da categoria do supervisor
       const minhasSolicitacoes = (result.solicitacoes || []).filter(
-        (s: Solicitacao) => s.categoria === user?.categoria
+        (s: Solicitacao) => s.categoria === usuario?.categoria
       );
 
       setSolicitacoes(minhasSolicitacoes);
@@ -159,7 +159,7 @@ export default function DashboardSupervisor() {
   if (solicitacaoSelecionada) {
     return (
       <div className="dashboard-container">
-        <DashboardHeader title="Análise de Solicitação" userName={user?.nome || 'Supervisor'} />
+        <DashboardHeader title="Análise de Solicitação" userName={usuario?.nome || 'Supervisor'} />
 
         <div className="dashboard-main">
           <button 
@@ -303,15 +303,15 @@ export default function DashboardSupervisor() {
   return (
     <div className="dashboard-container">
       <DashboardHeader 
-        title={`Painel do Supervisor - ${user?.categoria || ''}`} 
-        userName={user?.nome || 'Supervisor'} 
+        title={`Painel do Supervisor - ${usuario?.categoria || ''}`} 
+        userName={usuario?.nome || 'Supervisor'} 
       />
 
       <div className="dashboard-main">
         <DashboardCard title="👋 Bem-vindo, Supervisor!">
           <p>
             Você é responsável por aprovar ou reprovar as solicitações de autorização de saída 
-            dos atletas da categoria <strong>{user?.categoria}</strong>.
+            dos atletas da categoria <strong>{usuario?.categoria}</strong>.
           </p>
           <div className="attention-box">
             <strong>⚠️ Importante:</strong> Você visualiza apenas solicitações da sua categoria. 
@@ -379,7 +379,7 @@ export default function DashboardSupervisor() {
         </DashboardCard>
 
         {/* Lista de Solicitações */}
-        <DashboardCard title={`📋 Solicitações - ${user?.categoria}`}>
+        <DashboardCard title={`📋 Solicitações - ${usuario?.categoria}`}>
           {solicitacoesFiltradas.length === 0 ? (
             <div className="empty-state">
               <p>Nenhuma solicitação encontrada com este filtro.</p>

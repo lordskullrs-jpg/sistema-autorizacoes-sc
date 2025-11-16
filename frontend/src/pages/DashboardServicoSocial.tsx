@@ -31,7 +31,7 @@ interface Solicitacao {
 }
 
 export default function DashboardServicoSocial() {
-  const { token, user } = useAuth();
+  const { token, usuario } = useAuth();
   const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
@@ -195,7 +195,7 @@ export default function DashboardServicoSocial() {
   if (solicitacaoSelecionada) {
     return (
       <div className="dashboard-container">
-        <DashboardHeader title="Análise de Solicitação" userName={user?.nome || 'Serviço Social'} />
+        <DashboardHeader title="Análise de Solicitação" userName={usuario?.nome || 'Serviço Social'} />
 
         <div className="dashboard-main">
           <button 
@@ -411,7 +411,7 @@ export default function DashboardServicoSocial() {
 
   return (
     <div className="dashboard-container">
-      <DashboardHeader title="Painel do Serviço Social" userName={user?.nome || 'Serviço Social'} />
+      <DashboardHeader title="Painel do Serviço Social" userName={usuario?.nome || 'Serviço Social'} />
 
       <div className="dashboard-main">
         <DashboardCard title="👋 Bem-vindo ao Serviço Social!">
