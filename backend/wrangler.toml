@@ -1,0 +1,30 @@
+name = "autorizacoes-backend"
+main = "src/index.ts"
+compatibility_date = "2024-11-15"
+compatibility_flags = ["nodejs_compat"]
+
+# Cloudflare D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "autorizacoes-db"
+database_id = "fb65cc96-00fc-42e6-a0ff-e549eefff811"
+
+# Cloudflare KV para sessões
+[[kv_namespaces]]
+binding = "SESSIONS"
+id = "80f67c72255541d186cdae935f11c5bd"
+preview_id = "1fd3ea1c8d684d6aae8ff914be6fe40b"  
+
+
+# Variáveis de ambiente
+[vars]
+JWT_SECRET = "CIPEfeiGlvmJcLhH1BKDV4urzwRk8qOZaFs2Yxt7QSMbo60NUTjd5XWnp9y3gA"
+WHATSAPP_API_URL = "https://wa.me"
+
+# Configurações de desenvolvimento
+[env.development]
+name = "autorizacoes-backend-dev"
+
+# Configurações de produção
+[env.production]
+name = "autorizacoes-backend-prod"
