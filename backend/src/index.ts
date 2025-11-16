@@ -39,7 +39,7 @@ app.get('/', (c) => {
 });
 
 // Rota de health check da API
-app.get('/api', (c) => {
+app.get('/api-status', (c) => {
   return c.json({
     message: 'API de Autorizações - SC Internacional',
     version: '2.0.0',
@@ -53,10 +53,10 @@ app.get('/api', (c) => {
 });
 
 // Registrar rotas
-app.route('/api/publico', publico);  // Rotas públicas (atletas)
-app.route('/api/auth', auth);        // Autenticação (staff)
-app.route('/api/solicitacoes', solicitacoes);  // Solicitações (staff)
-app.route('/api/aprovacao', aprovacao);  // Aprovação pais
+app.route('/publico', publico);  // Rotas públicas (atletas)
+app.route('/auth', auth);        // Autenticação (staff)
+app.route('/solicitacoes', solicitacoes);  // Solicitações (staff)
+app.route('/aprovacao', aprovacao);  // Aprovação pais
 
 // Exportar aplicação
 export default app;
