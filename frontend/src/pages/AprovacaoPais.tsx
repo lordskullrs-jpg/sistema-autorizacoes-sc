@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Card from '../components/Card';
-
 import Alert from '../components/Alert';
 import Loading from '../components/Loading';
 
@@ -14,20 +13,22 @@ export default function AprovacaoPais() {
   const [processando, setProcessando] = useState(false);
   const [concluido, setConcluido] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
+
   useEffect(() => {
     carregarSolicitacao();
   }, [token]);
 
   const carregarSolicitacao = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8787/api/aprovacao/${token}`);
+      const response = await fetch(`${API_URL}/api/aprovacao/${token}`);
       const result = await response.json();
 
       if (!response.ok) {
         throw new Error(result.error || 'Link inválido ou expirado');
       }
 
-      setSolicitacao(result.solicitacao);
+      setSolicitacao(result);
     } catch (error: any) {
       setErro(error.message);
     } finally {
@@ -45,7 +46,7 @@ export default function AprovacaoPais() {
     setErro('');
 
     try {
-      const response = await fetch(`http://127.0.0.1:8787/api/aprovacao/${token}`, {
+      const response = await fetch(`${API_URL}/api/aprovacao/${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

@@ -27,6 +27,8 @@ interface Solicitacao {
   observacao_supervisor?: string;
   observacao_servico_social?: string;
   link_aprovacao_pais?: string;
+  token_pais?: string;
+  token_pais_expira_em?: string;
   criado_em: string;
 }
 
@@ -42,7 +44,7 @@ export default function DashboardServicoSocial() {
   const [filtro, setFiltro] = useState<string>('pendentes');
   const [linkWhatsApp, setLinkWhatsApp] = useState('');
 
-  const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskullrs-jpg.workers.dev';
+  const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
 
   useEffect(() => {
     carregarSolicitacoes();
@@ -79,7 +81,7 @@ export default function DashboardServicoSocial() {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/solicitacoes/${solicitacaoSelecionada.id}/enviar-pais`,
+        `${API_URL}/api/solicitacoes/${solicitacaoSelecionada.id}/enviar-link-pais`,
         {
           method: 'POST',
           headers: {
@@ -94,7 +96,7 @@ export default function DashboardServicoSocial() {
         throw new Error(result.error || 'Erro ao gerar link');
       }
 
-      setLinkWhatsApp(result.linkWhatsApp);
+      setLinkWhatsApp(result.whatsapp_link);
       setSucesso('✅ Link gerado com sucesso! Envie pelo WhatsApp.');
       await carregarSolicitacoes();
     } catch (error: any) {
@@ -150,6 +152,26 @@ export default function DashboardServicoSocial() {
     }
   };
 
+  const copiarLink = (link: string) => {
+    navigator.clipboard.writeText(link);
+    setSucesso('✅ Link copiado para a área de transferência!');
+    setTimeout(() => setSucesso(''), 3000);
+  };
+
+  const abrirWhatsApp = (solicitacao: Solicitacao, link: string) => {
+    const telefone = solicitacao.telefone_responsavel.replace(/\D/g, '');
+    const mensagem = encodeURIComponent(
+      `🔴 SC Internacional - Autorização de Saída\n\n` +
+      `Olá! Seu filho(a) ${solicitacao.nome} solicitou autorização de saída.\n\n` +
+      `📅 Data: ${new Date(solicitacao.data_saida).toLocaleDateString('pt-BR')}\n` +
+      `🕐 Horário: ${solicitacao.horario_saida}\n` +
+      `📍 Motivo: ${solicitacao.motivo_destino}\n\n` +
+      `Por favor, clique no link abaixo para aprovar ou reprovar:\n` +
+      `${link}`
+    );
+    window.open(`https://wa.me/${telefone}?text=${mensagem}`, '_blank');
+  };
+
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'Aprovado':
@@ -193,6 +215,10 @@ export default function DashboardServicoSocial() {
   }
 
   if (solicitacaoSelecionada) {
+    const linkCompleto = solicitacaoSelecionada.link_aprovacao_pais 
+      ? `${API_URL}/aprovacao-pais/${solicitacaoSelecionada.link_aprovacao_pais}`
+      : null;
+
     return (
       <div className="dashboard-container">
         <DashboardHeader title="Análise de Solicitação" userName={usuario?.nome || 'Serviço Social'} />
@@ -312,7 +338,43 @@ export default function DashboardServicoSocial() {
               </div>
             </div>
 
-            {/* Link WhatsApp */}
+            {/* Link existente no banco de dados */}
+            {linkCompleto && !linkWhatsApp && (
+              <div className="alert alert-info" style={{padding: '1.5rem'}}>
+                <h4 style={{marginBottom: '1rem'}}>🔗 Link de Aprovação dos Pais</h4>
+                <p style={{marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666'}}>
+                  Este link já foi gerado anteriormente. Você pode copiá-lo e enviá-lo via WhatsApp.
+                </p>
+                <div style={{
+                  background: '#f5f5f5',
+                  padding: '0.75rem',
+                  borderRadius: '4px',
+                  marginBottom: '1rem',
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  fontSize: '0.85rem',
+                  border: '1px solid #ddd'
+                }}>
+                  {linkCompleto}
+                </div>
+                <div style={{display: 'flex', gap: '0.5rem', flexWrap: 'wrap'}}>
+                  <button
+                    onClick={() => copiarLink(linkCompleto)}
+                    className="btn btn-primary"
+                  >
+                    📋 Copiar Link
+                  </button>
+                  <button
+                    onClick={() => abrirWhatsApp(solicitacaoSelecionada, linkCompleto)}
+                    className="btn btn-success"
+                  >
+                    📱 Abrir WhatsApp
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Link recém-gerado via API */}
             {linkWhatsApp && (
               <div className="alert alert-success" style={{padding: '1.5rem'}}>
                 <h4 style={{marginBottom: '1rem'}}>✅ Link Gerado com Sucesso!</h4>
@@ -339,7 +401,7 @@ export default function DashboardServicoSocial() {
                   className="btn btn-primary"
                   disabled={processando}
                 >
-                  {processando ? 'Processando...' : '📱 Enviar para Pais'}
+                  {processando ? 'Processando...' : linkCompleto ? '🔄 Gerar Novo Link' : '📱 Enviar para Pais'}
                 </button>
                 <button
                   onClick={() => handleAprovarFinal(false)}
