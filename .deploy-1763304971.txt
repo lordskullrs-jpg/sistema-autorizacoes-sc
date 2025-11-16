@@ -1,0 +1,1 @@
+# Deploy forçado para aplicar correção da variável VITE_API_URL
