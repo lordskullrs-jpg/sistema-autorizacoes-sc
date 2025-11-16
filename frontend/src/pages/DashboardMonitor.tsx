@@ -1,19 +1,44 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import DashboardHeader from '../components/DashboardHeader';
 import DashboardCard from '../components/DashboardCard';
 import '../styles/dashboard.css';
 
+interface Solicitacao {
+  id: string;
+  codigo_unico: string;
+  nome: string;
+  email: string;
+  categoria: string;
+  telefone: string;
+  data_saida: string;
+  horario_saida: string;
+  data_retorno: string;
+  horario_retorno: string;
+  motivo_destino: string;
+  status_supervisor: string;
+  status_pais: string;
+  status_servico_social: string;
+  status_monitor: string;
+  status_geral: string;
+  status_final: string;
+  observacao_monitor?: string;
+  saida_confirmada_em?: string;
+  retorno_confirmado_em?: string;
+}
+
 export default function DashboardMonitor() {
-  const { token } = useAuth();
-  const [solicitacoes, setSolicitacoes] = useState<any[]>([]);
+  const { token, user } = useAuth();
+  const [solicitacoes, setSolicitacoes] = useState<Solicitacao[]>([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
-  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<any>(null);
+  const [solicitacaoSelecionada, setSolicitacaoSelecionada] = useState<Solicitacao | null>(null);
   const [observacao, setObservacao] = useState('');
   const [processando, setProcessando] = useState(false);
+  const [filtro, setFiltro] = useState<string>('todos');
+
+  const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskullrs-jpg.workers.dev';
 
   useEffect(() => {
     carregarSolicitacoes();
@@ -21,7 +46,7 @@ export default function DashboardMonitor() {
 
   const carregarSolicitacoes = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8787/api/solicitacoes', {
+      const response = await fetch(`${API_URL}/api/solicitacoes`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -46,10 +71,11 @@ export default function DashboardMonitor() {
 
     setProcessando(true);
     setErro('');
+    setSucesso('');
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8787/api/solicitacoes/${solicitacaoSelecionada.id}/monitor`,
+        `${API_URL}/api/solicitacoes/${solicitacaoSelecionada.id}/monitor`,
         {
           method: 'PUT',
           headers: {
@@ -72,20 +98,20 @@ export default function DashboardMonitor() {
       let mensagem = '';
       switch (acao) {
         case 'confirmar_saida':
-          mensagem = 'Saída confirmada com sucesso!';
+          mensagem = '✅ Saída confirmada com sucesso!';
           break;
         case 'confirmar_retorno':
-          mensagem = 'Retorno confirmado com sucesso!';
+          mensagem = '✅ Retorno confirmado com sucesso!';
           break;
         case 'arquivar':
-          mensagem = 'Solicitação arquivada com sucesso!';
+          mensagem = '📁 Solicitação arquivada com sucesso!';
           break;
       }
 
       setSucesso(mensagem);
       setSolicitacaoSelecionada(null);
       setObservacao('');
-      carregarSolicitacoes();
+      await carregarSolicitacoes();
     } catch (error: any) {
       setErro(error.message);
     } finally {
@@ -93,277 +119,314 @@ export default function DashboardMonitor() {
     }
   };
 
-  const stats = {
-    pendentes: solicitacoes.filter(s => s.status_final === 'Em Análise').length,
-    aprovadas: solicitacoes.filter(s => s.status_final === 'Aprovado').length,
-    reprovadas: solicitacoes.filter(s => s.status_final === 'Reprovado').length
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'Aprovado':
+        return 'badge-success';
+      case 'Reprovado':
+        return 'badge-danger';
+      case 'Pendente':
+        return 'badge-warning';
+      default:
+        return 'badge-secondary';
+    }
   };
 
-  const navigate = useNavigate();
+  const solicitacoesFiltradas = solicitacoes.filter(s => {
+    if (filtro === 'todos') return true;
+    if (filtro === 'aguardando_saida') return s.status_geral === 'Aprovado - Aguardando Saída';
+    if (filtro === 'saiu') return s.status_geral === 'Saiu';
+    if (filtro === 'retornou') return s.status_geral === 'Retornou';
+    return true;
+  });
 
-  if (loading) return <div className="loading-message">Carregando...</div>;
+  const stats = {
+    aguardandoSaida: solicitacoes.filter(s => s.status_geral === 'Aprovado - Aguardando Saída').length,
+    saiu: solicitacoes.filter(s => s.status_geral === 'Saiu').length,
+    retornou: solicitacoes.filter(s => s.status_geral === 'Retornou').length,
+    total: solicitacoes.length
+  };
 
-  return (
-    <div className="dashboard-container">
-      <DashboardHeader title="Sistema de Autorizações Digitais" userName="Monitor" />
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="loading-message">
+          <div className="spinner"></div>
+          <p>Carregando solicitações...</p>
+        </div>
+      </div>
+    );
+  }
 
-      <div className="dashboard-main">
-        {/* Card de Boas-vindas */}
-        <DashboardCard title="Painel do Monitor">
-          <p>
-            Bem-vindo ao painel do monitor. Aqui você tem acesso a todas as solicitações 
-            de autorização de saída que foram aprovadas pelo serviço social e estão prontas 
-            para controle de saída e retorno.
-          </p>
-          <div className="attention-box">
-            <strong>⚠️ Atenção:</strong>
-            <p>
-              Você tem acesso a todas as categorias. Registre as saídas e retornos 
-              dos atletas conforme acontecem.
-            </p>
-          </div>
-        </DashboardCard>
+  if (solicitacaoSelecionada) {
+    return (
+      <div className="dashboard-container">
+        <DashboardHeader title="Controle de Saída/Retorno" userName={user?.nome || 'Monitor'} />
 
-        {/* Visão Geral - Estatísticas */}
-        <DashboardCard title="Visão Geral">
-          <div className="stats-grid">
-            <div className="stat-card stat-pending">
-              <div className="stat-label">Pendentes</div>
-              <div className="stat-number">{stats.pendentes}</div>
+        <div className="dashboard-main">
+          <button 
+            onClick={() => {
+              setSolicitacaoSelecionada(null);
+              setObservacao('');
+              setErro('');
+              setSucesso('');
+            }}
+            className="btn-back"
+            disabled={processando}
+          >
+            ← Voltar para Lista
+          </button>
+
+          {erro && <div className="alert alert-danger">{erro}</div>}
+          {sucesso && <div className="alert alert-success">{sucesso}</div>}
+
+          <DashboardCard title={`📋 Solicitação #${solicitacaoSelecionada.codigo_unico}`}>
+            <div className="status-badge-container">
+              <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_final)}`}>
+                {solicitacaoSelecionada.status_geral}
+              </span>
             </div>
-            <div className="stat-card stat-approved">
-              <div className="stat-label">Aprovadas</div>
-              <div className="stat-number">{stats.aprovadas}</div>
-            </div>
-            <div className="stat-card stat-rejected">
-              <div className="stat-label">Reprovadas</div>
-              <div className="stat-number">{stats.reprovadas}</div>
-            </div>
-          </div>
-        </DashboardCard>
 
-        {erro && <div className="error-message">{erro}</div>}
-        {sucesso && <div className="attention-box" style={{background: '#d4edda', borderColor: '#28a745'}}>{sucesso}</div>}
-
-        {solicitacaoSelecionada ? (
-          <Card title="📋 Controle de Saída/Retorno">
-            <div style={{ padding: '2rem' }}>
-              <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-                <h3>Status Atual:</h3>
-                <StatusBadge status={solicitacaoSelecionada.status_geral} />
-              </div>
-
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ color: '#cc0d2e' }}>Dados do Atleta</h3>
-                <table style={{ width: '100%', marginTop: '1rem' }}>
-                  <tbody>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold', width: '200px' }}>Código:</td>
-                      <td style={{ padding: '0.5rem' }}>{solicitacaoSelecionada.codigo_unico}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Nome:</td>
-                      <td style={{ padding: '0.5rem' }}>{solicitacaoSelecionada.nome}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Categoria:</td>
-                      <td style={{ padding: '0.5rem' }}>{solicitacaoSelecionada.categoria}</td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Telefone:</td>
-                      <td style={{ padding: '0.5rem' }}>{solicitacaoSelecionada.telefone}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ color: '#cc0d2e' }}>Dados da Saída</h3>
-                <table style={{ width: '100%', marginTop: '1rem' }}>
-                  <tbody>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold', width: '200px' }}>Saída:</td>
-                      <td style={{ padding: '0.5rem' }}>
-                        {new Date(solicitacaoSelecionada.data_saida).toLocaleDateString('pt-BR')} às {solicitacaoSelecionada.horario_saida}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Retorno Previsto:</td>
-                      <td style={{ padding: '0.5rem' }}>
-                        {new Date(solicitacaoSelecionada.data_retorno).toLocaleDateString('pt-BR')} às {solicitacaoSelecionada.horario_retorno}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Motivo:</td>
-                      <td style={{ padding: '0.5rem' }}>{solicitacaoSelecionada.motivo_destino}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div style={{ marginBottom: '2rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px' }}>
-                <h4>Histórico de Aprovações:</h4>
-                <div style={{ marginTop: '1rem' }}>
-                  <p><strong>Supervisor:</strong> <StatusBadge status={solicitacaoSelecionada.status_supervisor} /></p>
-                  <p><strong>Pais:</strong> <StatusBadge status={solicitacaoSelecionada.status_pais} /></p>
-                  <p><strong>Serviço Social:</strong> <StatusBadge status={solicitacaoSelecionada.status_servico_social} /></p>
+            <div className="info-section">
+              <h3>👤 Dados do Atleta</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <span className="info-label">Nome:</span>
+                  <span className="info-value">{solicitacaoSelecionada.nome}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Categoria:</span>
+                  <span className="info-value">{solicitacaoSelecionada.categoria}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Telefone:</span>
+                  <span className="info-value">{solicitacaoSelecionada.telefone}</span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Email:</span>
+                  <span className="info-value">{solicitacaoSelecionada.email}</span>
                 </div>
               </div>
+            </div>
 
-              <div className="form-group">
-                <label className="form-label">Observação (opcional):</label>
-                <textarea
-                  className="form-control"
-                  value={observacao}
-                  onChange={(e) => setObservacao(e.target.value)}
-                  rows={2}
-                  placeholder="Digite uma observação se necessário..."
-                  disabled={processando}
-                />
+            <div className="info-section">
+              <h3>📅 Dados da Saída</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <span className="info-label">Data/Hora Saída:</span>
+                  <span className="info-value">
+                    {new Date(solicitacaoSelecionada.data_saida).toLocaleDateString('pt-BR')} às {solicitacaoSelecionada.horario_saida}
+                  </span>
+                </div>
+                <div className="info-item">
+                  <span className="info-label">Data/Hora Retorno:</span>
+                  <span className="info-value">
+                    {new Date(solicitacaoSelecionada.data_retorno).toLocaleDateString('pt-BR')} às {solicitacaoSelecionada.horario_retorno}
+                  </span>
+                </div>
+                <div className="info-item full-width">
+                  <span className="info-label">Motivo/Destino:</span>
+                  <span className="info-value">{solicitacaoSelecionada.motivo_destino}</span>
+                </div>
               </div>
+            </div>
 
-              {/* Ações baseadas no status */}
+            <div className="info-section">
+              <h3>✅ Histórico de Aprovações</h3>
+              <div className="approval-history">
+                <div className="approval-item">
+                  <span className="approval-label">Supervisor:</span>
+                  <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_supervisor)}`}>
+                    {solicitacaoSelecionada.status_supervisor}
+                  </span>
+                </div>
+                <div className="approval-item">
+                  <span className="approval-label">Pais/Responsáveis:</span>
+                  <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_pais)}`}>
+                    {solicitacaoSelecionada.status_pais}
+                  </span>
+                </div>
+                <div className="approval-item">
+                  <span className="approval-label">Serviço Social:</span>
+                  <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_servico_social)}`}>
+                    {solicitacaoSelecionada.status_servico_social}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Observação (opcional):</label>
+              <textarea
+                className="form-control"
+                value={observacao}
+                onChange={(e) => setObservacao(e.target.value)}
+                rows={3}
+                placeholder="Digite uma observação se necessário..."
+                disabled={processando}
+              />
+            </div>
+
+            <div className="action-buttons">
               {solicitacaoSelecionada.status_geral === 'Aprovado - Aguardando Saída' && (
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                  <button
-                    onClick={() => handleAcaoMonitor('confirmar_saida')}
-                    className="btn btn-primary"
-                    disabled={processando}
-                    style={{ flex: 1 }}
-                  >
-                    ✅ Confirmar Saída
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSolicitacaoSelecionada(null);
-                      setObservacao('');
-                    }}
-                    className="btn btn-secondary"
-                    disabled={processando}
-                  >
-                    Voltar
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleAcaoMonitor('confirmar_saida')}
+                  className="btn btn-success"
+                  disabled={processando}
+                >
+                  {processando ? 'Processando...' : '✅ Confirmar Saída'}
+                </button>
               )}
 
               {solicitacaoSelecionada.status_geral === 'Saiu' && (
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                  <button
-                    onClick={() => handleAcaoMonitor('confirmar_retorno')}
-                    className="btn btn-primary"
-                    disabled={processando}
-                    style={{ flex: 1 }}
-                  >
-                    ✅ Confirmar Retorno
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSolicitacaoSelecionada(null);
-                      setObservacao('');
-                    }}
-                    className="btn btn-secondary"
-                    disabled={processando}
-                  >
-                    Voltar
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleAcaoMonitor('confirmar_retorno')}
+                  className="btn btn-success"
+                  disabled={processando}
+                >
+                  {processando ? 'Processando...' : '✅ Confirmar Retorno'}
+                </button>
               )}
 
               {solicitacaoSelecionada.status_geral === 'Retornou' && (
-                <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
-                  <button
-                    onClick={() => handleAcaoMonitor('arquivar')}
-                    className="btn btn-primary"
-                    disabled={processando}
-                    style={{ flex: 1 }}
-                  >
-                    📁 Arquivar
-                  </button>
-                  <button
-                    onClick={() => {
-                      setSolicitacaoSelecionada(null);
-                      setObservacao('');
-                    }}
-                    className="btn btn-secondary"
-                    disabled={processando}
-                  >
-                    Voltar
-                  </button>
-                </div>
-              )}
-
-              {!['Aprovado - Aguardando Saída', 'Saiu', 'Retornou'].includes(solicitacaoSelecionada.status_geral) && (
-                <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-                  <p style={{ color: '#666', marginBottom: '1rem' }}>
-                    {solicitacaoSelecionada.status_geral.includes('Reprovado') 
-                      ? '❌ Esta solicitação foi reprovada. Atleta não pode sair.'
-                      : '⏳ Aguardando aprovações. Atleta ainda não pode sair.'}
-                  </p>
-                  <button
-                    onClick={() => {
-                      setSolicitacaoSelecionada(null);
-                      setObservacao('');
-                    }}
-                    className="btn btn-secondary"
-                  >
-                    Voltar
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleAcaoMonitor('arquivar')}
+                  className="btn btn-primary"
+                  disabled={processando}
+                >
+                  {processando ? 'Processando...' : '📁 Arquivar Solicitação'}
+                </button>
               )}
             </div>
-          </Card>
-        ) : (
-          <Card title="📋 Todas as Solicitações">
-            {solicitacoes.length === 0 ? (
-              <div style={{ padding: '3rem', textAlign: 'center', color: '#666' }}>
-                <p>Nenhuma solicitação no momento.</p>
-              </div>
-            ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ background: '#f9f9f9', borderBottom: '2px solid #ddd' }}>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Código</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Nome</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Categoria</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Saída</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Retorno</th>
-                      <th style={{ padding: '1rem', textAlign: 'left' }}>Status</th>
-                      <th style={{ padding: '1rem', textAlign: 'center' }}>Ações</th>
+          </DashboardCard>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="dashboard-container">
+      <DashboardHeader title="Painel do Monitor" userName={user?.nome || 'Monitor'} />
+
+      <div className="dashboard-main">
+        <DashboardCard title="👋 Bem-vindo, Monitor!">
+          <p>
+            Aqui você controla as saídas e retornos dos atletas. Todas as solicitações aprovadas 
+            pelo Serviço Social aparecem aqui para você registrar quando o atleta sai e retorna.
+          </p>
+          <div className="attention-box">
+            <strong>⚠️ Importante:</strong> Registre as saídas e retornos assim que acontecerem 
+            para manter o controle atualizado.
+          </div>
+        </DashboardCard>
+
+        {/* Estatísticas */}
+        <DashboardCard title="📊 Visão Geral">
+          <div className="stats-grid">
+            <div className="stat-card stat-warning">
+              <div className="stat-icon">⏳</div>
+              <div className="stat-number">{stats.aguardandoSaida}</div>
+              <div className="stat-label">Aguardando Saída</div>
+            </div>
+            <div className="stat-card stat-info">
+              <div className="stat-icon">🚶</div>
+              <div className="stat-number">{stats.saiu}</div>
+              <div className="stat-label">Saíram</div>
+            </div>
+            <div className="stat-card stat-success">
+              <div className="stat-icon">✅</div>
+              <div className="stat-number">{stats.retornou}</div>
+              <div className="stat-label">Retornaram</div>
+            </div>
+            <div className="stat-card stat-primary">
+              <div className="stat-icon">📋</div>
+              <div className="stat-number">{stats.total}</div>
+              <div className="stat-label">Total</div>
+            </div>
+          </div>
+        </DashboardCard>
+
+        {erro && <div className="alert alert-danger">{erro}</div>}
+        {sucesso && <div className="alert alert-success">{sucesso}</div>}
+
+        {/* Filtros */}
+        <DashboardCard title="🔍 Filtrar Solicitações">
+          <div className="filter-buttons">
+            <button 
+              className={`filter-btn ${filtro === 'todos' ? 'active' : ''}`}
+              onClick={() => setFiltro('todos')}
+            >
+              Todas ({solicitacoes.length})
+            </button>
+            <button 
+              className={`filter-btn ${filtro === 'aguardando_saida' ? 'active' : ''}`}
+              onClick={() => setFiltro('aguardando_saida')}
+            >
+              Aguardando Saída ({stats.aguardandoSaida})
+            </button>
+            <button 
+              className={`filter-btn ${filtro === 'saiu' ? 'active' : ''}`}
+              onClick={() => setFiltro('saiu')}
+            >
+              Saíram ({stats.saiu})
+            </button>
+            <button 
+              className={`filter-btn ${filtro === 'retornou' ? 'active' : ''}`}
+              onClick={() => setFiltro('retornou')}
+            >
+              Retornaram ({stats.retornou})
+            </button>
+          </div>
+        </DashboardCard>
+
+        {/* Lista de Solicitações */}
+        <DashboardCard title="📋 Solicitações">
+          {solicitacoesFiltradas.length === 0 ? (
+            <div className="empty-state">
+              <p>Nenhuma solicitação encontrada com este filtro.</p>
+            </div>
+          ) : (
+            <div className="table-responsive">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Código</th>
+                    <th>Atleta</th>
+                    <th>Categoria</th>
+                    <th>Saída</th>
+                    <th>Retorno</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {solicitacoesFiltradas.map((sol) => (
+                    <tr key={sol.id}>
+                      <td className="code-cell">{sol.codigo_unico}</td>
+                      <td>{sol.nome}</td>
+                      <td><span className="category-badge">{sol.categoria}</span></td>
+                      <td>{new Date(sol.data_saida).toLocaleDateString('pt-BR')}</td>
+                      <td>{new Date(sol.data_retorno).toLocaleDateString('pt-BR')}</td>
+                      <td>
+                        <span className={`status-badge ${getStatusBadgeClass(sol.status_final)}`}>
+                          {sol.status_geral}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => setSolicitacaoSelecionada(sol)}
+                          className="btn btn-sm btn-primary"
+                        >
+                          Ver Detalhes
+                        </button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {solicitacoes.map((sol) => (
-                      <tr key={sol.id} style={{ borderBottom: '1px solid #eee' }}>
-                        <td style={{ padding: '1rem' }}>{sol.codigo_unico}</td>
-                        <td style={{ padding: '1rem' }}>{sol.nome}</td>
-                        <td style={{ padding: '1rem' }}>{sol.categoria}</td>
-                        <td style={{ padding: '1rem' }}>
-                          {new Date(sol.data_saida).toLocaleDateString('pt-BR')}
-                        </td>
-                        <td style={{ padding: '1rem' }}>
-                          {new Date(sol.data_retorno).toLocaleDateString('pt-BR')}
-                        </td>
-                        <td style={{ padding: '1rem' }}>
-                          <StatusBadge status={sol.status_geral} />
-                        </td>
-                        <td style={{ padding: '1rem', textAlign: 'center' }}>
-                          <button
-                            onClick={() => setSolicitacaoSelecionada(sol)}
-                            className="btn btn-primary"
-                            style={{ fontSize: '0.9rem', padding: '0.5rem 1rem' }}
-                          >
-                            Ver Detalhes
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
-        )}
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </DashboardCard>
       </div>
     </div>
   );
