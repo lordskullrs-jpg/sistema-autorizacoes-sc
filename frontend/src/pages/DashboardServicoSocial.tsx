@@ -215,9 +215,7 @@ export default function DashboardServicoSocial() {
   }
 
   if (solicitacaoSelecionada) {
-    const linkCompleto = solicitacaoSelecionada.link_aprovacao_pais 
-      ? `${API_URL}/aprovacao-pais/${solicitacaoSelecionada.link_aprovacao_pais}`
-      : null;
+    const linkCompleto = solicitacaoSelecionada.link_aprovacao_pais || null;
 
     return (
       <div className="dashboard-container">
