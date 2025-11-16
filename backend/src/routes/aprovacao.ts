@@ -7,7 +7,7 @@ import { SolicitacaoService } from '../services/solicitacao-service';
 const aprovacao = new Hono<{ Bindings: Env }>();
 
 /**
- * GET /api/aprovacao/:token
+ * GET /api/aprovacao-pais/:token
  * Valida token e retorna dados da solicitação
  */
 aprovacao.get('/:token', async (c) => {
@@ -48,7 +48,7 @@ aprovacao.get('/:token', async (c) => {
 });
 
 /**
- * POST /api/aprovacao/:token
+ * POST /api/aprovacao-pais/:token
  * Aprova/reprova solicitação pelos pais
  */
 aprovacao.post('/:token', async (c) => {

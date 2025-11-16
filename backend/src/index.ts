@@ -47,7 +47,7 @@ app.get('/api-status', (c) => {
       publico: '/api/publico (sem autenticação)',
       auth: '/api/auth (login staff)',
       solicitacoes: '/api/solicitacoes (staff)',
-      aprovacao: '/api/aprovacao (pais)',
+      aprovacao: '/api/aprovacao-pais (pais)',
     },
   });
 });
@@ -56,7 +56,7 @@ app.get('/api-status', (c) => {
 app.route('/publico', publico);  // Rotas públicas (atletas)
 app.route('/auth', auth);        // Autenticação (staff)
 app.route('/solicitacoes', solicitacoes);  // Solicitações (staff)
-app.route('/aprovacao', aprovacao);  // Aprovação pais
+app.route('/aprovacao-pais', aprovacao);  // Aprovação pais
 
 // Exportar aplicação
 export default app;
