@@ -1,9 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Card from '../components/Card';
-import Alert from '../components/Alert';
-import '../styles/global.css';
+import '../styles/login.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -21,8 +19,6 @@ export default function Login() {
 
     try {
       await login(email, senha);
-      
-      // Redirecionar baseado no perfil será feito no App.tsx
       navigate('/dashboard');
     } catch (error: any) {
       setErro(error.message || 'Erro ao fazer login. Verifique suas credenciais.');
@@ -32,74 +28,86 @@ export default function Login() {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #cc0d2e 0%, #a00a25 100%)'
-    }}>
-      <div style={{ width: '100%', maxWidth: '400px', padding: '1rem' }}>
-        <Card>
-          <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-            <h1 style={{ color: '#cc0d2e', marginBottom: '0.5rem' }}>
-              🔴 SC Internacional
-            </h1>
-            <p style={{ color: '#666' }}>Sistema de Autorizações de Saída</p>
-          </div>
+    <div className="login-container">
+      <div className="login-card">
+        <div className="logo-section">
+          <img 
+            src="https://i.imgur.com/odzcc03.png" 
+            alt="Logo SC Internacional" 
+            className="logo"
+          />
+          <h1 className="system-title">Sistema de Controle de Autorizações</h1>
+        </div>
 
-          {erro && <Alert type="error" message={erro} onClose={() => setErro('')} />}
+        <div className="login-form-section">
+          <h2 className="login-title">Login</h2>
+          
+          {erro && (
+            <div className="error-message">
+              {erro}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label className="form-label">Email</label>
+              <label htmlFor="email">Email:</label>
               <input
                 type="email"
-                className="form-control"
+                id="email"
+                name="email"
+                placeholder="email@inter.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="seu.email@inter.com.br"
                 disabled={carregando}
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Senha</label>
+              <label htmlFor="senha">Senha:</label>
               <input
                 type="password"
-                className="form-control"
+                id="senha"
+                name="senha"
+                placeholder="••••••••"
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 required
-                placeholder="••••••••"
                 disabled={carregando}
               />
             </div>
 
             <button 
               type="submit" 
-              className="btn btn-primary" 
-              style={{ width: '100%', marginTop: '1rem' }}
+              className="login-btn"
               disabled={carregando}
             >
-              {carregando ? 'Entrando...' : 'Entrar'}
+              {carregando ? (
+                <>
+                  <span>Entrando...</span>
+                  <i className="fas fa-spinner fa-spin"></i>
+                </>
+              ) : (
+                'Entrar'
+              )}
             </button>
           </form>
+        </div>
 
-          <div style={{ marginTop: '2rem', padding: '1rem', background: '#f5f5f5', borderRadius: '8px', fontSize: '0.875rem' }}>
-            <strong>Usuários de teste:</strong>
-            <ul style={{ marginTop: '0.5rem', marginLeft: '1.5rem' }}>
-              <li>joao.silva@inter.com.br</li>
-              <li>supervisor.sub17@inter.com.br</li>
-              <li>servicosocial@inter.com.br</li>
-              <li>monitor@inter.com.br</li>
-              <li>admin@inter.com.br</li>
-            </ul>
-            <p style={{ marginTop: '0.5rem' }}><strong>Senha:</strong> senha123</p>
-          </div>
-        </Card>
+        <div className="social-service-block">
+          <img 
+            src="https://imgur.com/HIsH9X5.png" 
+            alt="Logo Serviço Social" 
+            className="footer-social-logo"
+          />
+          <p>Sistema de gerenciamento de autorizações</p>
+          <p>Departamento de Serviço Social</p>
+        </div>
       </div>
+
+      <footer className="login-footer">
+        <p>© 2025 TechVamp</p>
+      </footer>
     </div>
   );
 }

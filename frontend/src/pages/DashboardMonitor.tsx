@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import Header from '../components/Header';
-import Card from '../components/Card';
-import StatusBadge from '../components/StatusBadge';
-import Alert from '../components/Alert';
-import Loading from '../components/Loading';
+import DashboardHeader from '../components/DashboardHeader';
+import DashboardCard from '../components/DashboardCard';
+import '../styles/dashboard.css';
 
 export default function DashboardMonitor() {
   const { token } = useAuth();
@@ -94,22 +93,57 @@ export default function DashboardMonitor() {
     }
   };
 
-  if (loading) return <Loading />;
+  const stats = {
+    pendentes: solicitacoes.filter(s => s.status_final === 'Em Análise').length,
+    aprovadas: solicitacoes.filter(s => s.status_final === 'Aprovado').length,
+    reprovadas: solicitacoes.filter(s => s.status_final === 'Reprovado').length
+  };
+
+  const navigate = useNavigate();
+
+  if (loading) return <div className="loading-message">Carregando...</div>;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      <Header />
+    <div className="dashboard-container">
+      <DashboardHeader title="Sistema de Autorizações Digitais" userName="Monitor" />
 
-      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-        <div style={{ marginBottom: '2rem' }}>
-          <h2>🚪 Dashboard Monitor</h2>
-          <p style={{ color: '#666' }}>
-            Controle físico de saída e retorno. Você vê TODAS as solicitações (aprovadas, reprovadas, em análise).
+      <div className="dashboard-main">
+        {/* Card de Boas-vindas */}
+        <DashboardCard title="Painel do Monitor">
+          <p>
+            Bem-vindo ao painel do monitor. Aqui você tem acesso a todas as solicitações 
+            de autorização de saída que foram aprovadas pelo serviço social e estão prontas 
+            para controle de saída e retorno.
           </p>
-        </div>
+          <div className="attention-box">
+            <strong>⚠️ Atenção:</strong>
+            <p>
+              Você tem acesso a todas as categorias. Registre as saídas e retornos 
+              dos atletas conforme acontecem.
+            </p>
+          </div>
+        </DashboardCard>
 
-        {erro && <Alert type="error" message={erro} onClose={() => setErro('')} />}
-        {sucesso && <Alert type="success" message={sucesso} onClose={() => setSucesso('')} />}
+        {/* Visão Geral - Estatísticas */}
+        <DashboardCard title="Visão Geral">
+          <div className="stats-grid">
+            <div className="stat-card stat-pending">
+              <div className="stat-label">Pendentes</div>
+              <div className="stat-number">{stats.pendentes}</div>
+            </div>
+            <div className="stat-card stat-approved">
+              <div className="stat-label">Aprovadas</div>
+              <div className="stat-number">{stats.aprovadas}</div>
+            </div>
+            <div className="stat-card stat-rejected">
+              <div className="stat-label">Reprovadas</div>
+              <div className="stat-number">{stats.reprovadas}</div>
+            </div>
+          </div>
+        </DashboardCard>
+
+        {erro && <div className="error-message">{erro}</div>}
+        {sucesso && <div className="attention-box" style={{background: '#d4edda', borderColor: '#28a745'}}>{sucesso}</div>}
 
         {solicitacaoSelecionada ? (
           <Card title="📋 Controle de Saída/Retorno">
