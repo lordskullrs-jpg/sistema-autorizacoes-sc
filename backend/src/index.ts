@@ -10,6 +10,10 @@ import auth from './routes/auth';
 import solicitacoes from './routes/solicitacoes';
 import aprovacao from './routes/aprovacao';
 import publico from './routes/publico';
+import atleta from './routes/atleta';
+import admin from './routes/admin';
+import resetPassword from './routes/reset-password';
+import { authMiddleware } from './middleware/auth';
 
 // Criar aplicação Hono
 const app = new Hono<{ Bindings: Env }>();
@@ -44,19 +48,34 @@ app.get('/api-status', (c) => {
     message: 'API de Autorizações - SC Internacional',
     version: '2.0.0',
     endpoints: {
-      publico: '/api/publico (sem autenticação)',
-      auth: '/api/auth (login staff)',
+      publico: '/api/publico (consulta sem auth)',
+      auth: '/api/auth (login)',
+      atleta: '/api/atleta (atletas autenticados)',
       solicitacoes: '/api/solicitacoes (staff)',
       aprovacao: '/api/aprovacao-pais (pais)',
+      admin: '/api/admin (administradores)',
+      resetPassword: '/api/reset-password (redefinição de senha)',
     },
   });
 });
 
 // Registrar rotas
-app.route('/publico', publico);  // Rotas públicas (atletas)
-app.route('/auth', auth);        // Autenticação (staff)
+app.route('/publico', publico);  // Rotas públicas (consulta)
+app.route('/auth', auth);        // Autenticação
+
+// Aplicar middleware de autenticação nas rotas protegidas de atletas
+app.use('/atleta/*', authMiddleware);
+app.route('/atleta', atleta);    // Rotas protegidas de atletas (requer auth)
+
 app.route('/solicitacoes', solicitacoes);  // Solicitações (staff)
 app.route('/aprovacao-pais', aprovacao);  // Aprovação pais
+
+// Rotas de admin (requer auth de admin)
+app.use('/admin/*', authMiddleware);
+app.route('/admin', admin);
+
+// Rotas de redefinição de senha (públicas)
+app.route('/reset-password', resetPassword);
 
 // Exportar aplicação
 export default app;

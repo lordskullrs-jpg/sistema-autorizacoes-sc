@@ -5,6 +5,8 @@ import Solicitar from './pages/Solicitar';
 import Consultar from './pages/Consultar';
 import Dashboard from './pages/Dashboard';
 import AprovacaoPais from './pages/AprovacaoPais';
+import LoginAtleta from './pages/LoginAtleta';
+import RedefinirSenha from './pages/RedefinirSenha';
 import './styles/global.css';
 
 function App() {
@@ -16,9 +18,11 @@ function App() {
           <Route path="/" element={<Login />} />
           
           {/* Rotas Públicas */}
+          <Route path="/login-atleta" element={<LoginAtleta />} />
           <Route path="/solicitar" element={<Solicitar />} />
           <Route path="/consultar" element={<Consultar />} />
           <Route path="/aprovacao-pais/:token" element={<AprovacaoPais />} />
+          <Route path="/redefinir-senha/:token" element={<RedefinirSenha />} />
           
           {/* Rotas Autenticadas (Staff) */}
           <Route path="/login" element={<Navigate to="/" replace />} />

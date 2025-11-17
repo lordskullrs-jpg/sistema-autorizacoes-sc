@@ -74,3 +74,20 @@ export async function requireCategoria(c: Context<{ Bindings: Env; Variables: Au
 
   await next();
 }
+
+/**
+ * Middleware para verificar se o usuário é admin
+ */
+export async function adminOnly(c: Context<{ Bindings: Env; Variables: AuthContext }>, next: Next) {
+  const user = c.get('user');
+  
+  if (!user) {
+    return c.json({ error: 'Não autenticado' }, 401);
+  }
+  
+  if (user.perfil !== 'admin') {
+    return c.json({ error: 'Acesso negado. Apenas administradores.' }, 403);
+  }
+  
+  await next();
+}
