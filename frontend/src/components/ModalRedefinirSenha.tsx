@@ -3,10 +3,11 @@ import { useState, type FormEvent } from 'react';
 const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
 
 interface Props {
+  isOpen: boolean;
   onClose: () => void;
 }
 
-export default function ModalRedefinirSenha({ onClose }: Props) {
+export default function ModalRedefinirSenha({ isOpen, onClose }: Props) {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState('');
@@ -80,6 +81,8 @@ export default function ModalRedefinirSenha({ onClose }: Props) {
       window.open(linkGerado.whatsapp_link, '_blank');
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div style={{
