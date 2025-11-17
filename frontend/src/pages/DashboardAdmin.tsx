@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../components/Loading';
-import { ModalRedefinirSenha } from '../components/ModalRedefinirSenha';
-import { ModalAdicionarUsuario } from '../components/ModalAdicionarUsuario';
-import { ModalEditarUsuario } from '../components/ModalEditarUsuario';
-import { ModalExcluirUsuario } from '../components/ModalExcluirUsuario';
+import ModalRedefinirSenha from '../components/ModalRedefinirSenha';
+import ModalAdicionarUsuario from '../components/ModalAdicionarUsuario';
+import ModalEditarUsuario from '../components/ModalEditarUsuario';
+import ModalExcluirUsuario from '../components/ModalExcluirUsuario';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
 
