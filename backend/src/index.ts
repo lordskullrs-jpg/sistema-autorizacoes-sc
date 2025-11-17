@@ -61,7 +61,7 @@ app.get('/api-status', (c) => {
 
 // Registrar rotas
 app.route('/publico', publico);  // Rotas públicas (consulta)
-app.route('/auth', auth);        // Autenticação
+app.route('/api/auth', auth);       // Autenticação
 
 // Aplicar middleware de autenticação nas rotas protegidas de atletas
 app.use('/atleta/*', authMiddleware);
