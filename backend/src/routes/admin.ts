@@ -67,7 +67,7 @@ app.post('/usuarios', async (c) => {
     // Inserir usuário
     await c.env.DB
       .prepare(`
-        INSERT INTO usuarios (email, senha, nome, perfil, categoria, ativo)
+        INSERT INTO usuarios (email, senha_hash, nome, perfil, categoria, ativo)
         VALUES (?, ?, ?, ?, ?, ?)
       `)
       .bind(
@@ -146,7 +146,7 @@ app.put('/usuarios/:id', async (c) => {
     
     if (dados.senha) {
       const senhaHash = await hashPassword(dados.senha);
-      updates.push('senha = ?');
+      updates.push('senha_hash = ?');
       values.push(senhaHash);
     }
     

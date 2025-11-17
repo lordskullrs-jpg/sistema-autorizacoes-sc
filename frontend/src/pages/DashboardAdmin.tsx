@@ -1,17 +1,36 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import DashboardHeader from '../components/DashboardHeader';
 import Loading from '../components/Loading';
-import ModalRedefinirSenha from '../components/ModalRedefinirSenha';
+import { ModalRedefinirSenha } from '../components/ModalRedefinirSenha';
+import { ModalAdicionarUsuario } from '../components/ModalAdicionarUsuario';
+import { ModalEditarUsuario } from '../components/ModalEditarUsuario';
+import { ModalExcluirUsuario } from '../components/ModalExcluirUsuario';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
+
+interface Usuario {
+  id: string;
+  email: string;
+  nome: string;
+  perfil: string;
+  categoria?: string;
+  ativo: number;
+  criado_em: string;
+  ultimo_login?: string;
+}
 
 export default function DashboardAdmin() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [usuarios, setUsuarios] = useState<any[]>([]);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [configuracoes, setConfiguracoes] = useState<any[]>([]);
+  
+  // Modais
   const [mostrarModalRedefinir, setMostrarModalRedefinir] = useState(false);
+  const [mostrarModalAdicionar, setMostrarModalAdicionar] = useState(false);
+  const [mostrarModalEditar, setMostrarModalEditar] = useState(false);
+  const [mostrarModalExcluir, setMostrarModalExcluir] = useState(false);
+  const [usuarioSelecionado, setUsuarioSelecionado] = useState<Usuario | null>(null);
 
   useEffect(() => {
     carregarDados();
@@ -59,181 +78,213 @@ export default function DashboardAdmin() {
     navigate('/login');
   };
 
+  const handleEditarUsuario = (usuario: Usuario) => {
+    setUsuarioSelecionado(usuario);
+    setMostrarModalEditar(true);
+  };
+
+  const handleExcluirUsuario = (usuario: Usuario) => {
+    setUsuarioSelecionado(usuario);
+    setMostrarModalExcluir(true);
+  };
+
+  const handleSuccessModal = () => {
+    carregarDados(); // Recarregar lista de usuários
+  };
+
   if (loading) {
     return <Loading />;
   }
 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
+  const getPerfilBadge = (perfil: string) => {
+    const cores: any = {
+      admin: 'bg-purple-100 text-purple-800',
+      supervisor: 'bg-blue-100 text-blue-800',
+      servicosocial: 'bg-green-100 text-green-800',
+      monitor: 'bg-yellow-100 text-yellow-800',
+      atleta: 'bg-gray-100 text-gray-800'
+    };
+    
+    const nomes: any = {
+      admin: 'Admin',
+      supervisor: 'Supervisor',
+      servicosocial: 'Serviço Social',
+      monitor: 'Monitor',
+      atleta: 'Atleta'
+    };
+
+    return (
+      <span className={`px-2 py-1 rounded text-xs font-semibold ${cores[perfil] || 'bg-gray-100 text-gray-800'}`}>
+        {nomes[perfil] || perfil}
+      </span>
+    );
+  };
+
   return (
-    <div style={{ minHeight: '100vh', background: '#f5f5f5' }}>
-      {/* Header com botão Redefinir Senha */}
-      <div style={{
-        background: 'white',
-        borderBottom: '2px solid #cc0d2e',
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a href="#" style={{ color: '#666', textDecoration: 'none', fontSize: '0.9rem' }}>
+    <div className="min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="bg-white border-b-2 border-red-600 px-8 py-4 flex justify-between items-center">
+        <div className="flex gap-8 items-center">
+          <a href="#" className="text-gray-600 text-sm hover:text-red-600">
             Política de Privacidade LGPD
           </a>
           <button
             onClick={() => setMostrarModalRedefinir(true)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#cc0d2e',
-              cursor: 'pointer',
-              fontSize: '0.9rem',
-              fontWeight: 'bold'
-            }}
+            className="text-red-600 font-bold text-sm hover:text-red-700"
           >
             Redefinir Senha
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <span style={{ color: '#666', fontSize: '0.9rem' }}>{user.email}</span>
+        <div className="flex gap-4 items-center">
+          <span className="text-gray-600 text-sm">{user.email}</span>
           <button
             onClick={handleLogout}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#666',
-              cursor: 'pointer',
-              fontSize: '0.9rem'
-            }}
+            className="text-gray-600 text-sm hover:text-red-600"
           >
             Sair
           </button>
         </div>
       </div>
 
-      <DashboardHeader
-        titulo="Painel de Administração"
-        subtitulo="Gerenciamento de Usuários e Configurações"
-        perfil="admin"
-      />
+      {/* Conteúdo Principal */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-red-600">Painel de Administração</h1>
+            <p className="text-gray-600 mt-1">Gerencie usuários e configurações do sistema</p>
+          </div>
+          <div className="w-16 h-16">
+            <img 
+              src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Escudo_do_Sport_Club_Internacional.svg" 
+              alt="SC Internacional"
+              className="w-full h-full"
+            />
+          </div>
+        </div>
 
-      <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
         {/* Seção de Usuários */}
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '2rem',
-          marginBottom: '2rem',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{ color: '#cc0d2e', marginBottom: '1.5rem' }}>
-            👥 Gerenciamento de Usuários
-          </h2>
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-800">👥 Gerenciamento de Usuários</h2>
+            <button
+              onClick={() => setMostrarModalAdicionar(true)}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 flex items-center gap-2"
+            >
+              <span className="text-xl">+</span>
+              Adicionar Usuário
+            </button>
+          </div>
 
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '2px solid #ddd' }}>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Email</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Nome</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Perfil</th>
-                  <th style={{ padding: '1rem', textAlign: 'left' }}>Categoria</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Status</th>
-                  <th style={{ padding: '1rem', textAlign: 'center' }}>Último Login</th>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Email</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nome</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Perfil</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Categoria</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Status</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Ações</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-gray-200">
                 {usuarios.map((usuario) => (
-                  <tr key={usuario.id} style={{ borderBottom: '1px solid #eee' }}>
-                    <td style={{ padding: '1rem' }}>{usuario.email}</td>
-                    <td style={{ padding: '1rem' }}>{usuario.nome}</td>
-                    <td style={{ padding: '1rem' }}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        fontSize: '0.85rem',
-                        background: usuario.perfil === 'admin' ? '#ffc107' : '#17a2b8',
-                        color: 'white'
-                      }}>
-                        {usuario.perfil}
+                  <tr key={usuario.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-900">{usuario.email}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{usuario.nome}</td>
+                    <td className="px-4 py-3 text-sm">{getPerfilBadge(usuario.perfil)}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{usuario.categoria || '-'}</td>
+                    <td className="px-4 py-3 text-center">
+                      <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                        usuario.ativo === 1 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {usuario.ativo === 1 ? '✓ Ativo' : '✗ Inativo'}
                       </span>
                     </td>
-                    <td style={{ padding: '1rem' }}>{usuario.categoria || '-'}</td>
-                    <td style={{ padding: '1rem', textAlign: 'center' }}>
-                      <span style={{
-                        color: usuario.ativo ? '#28a745' : '#dc3545',
-                        fontWeight: 'bold'
-                      }}>
-                        {usuario.ativo ? '✅ Ativo' : '🔴 Inativo'}
-                      </span>
-                    </td>
-                    <td style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem', color: '#666' }}>
-                      {usuario.ultimo_login ? new Date(usuario.ultimo_login).toLocaleString('pt-BR') : 'Nunca'}
+                    <td className="px-4 py-3 text-center">
+                      <div className="flex justify-center gap-2">
+                        <button
+                          onClick={() => handleEditarUsuario(usuario)}
+                          className="text-blue-600 hover:text-blue-800 px-2 py-1 rounded hover:bg-blue-50"
+                          title="Editar"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleExcluirUsuario(usuario)}
+                          className="text-red-600 hover:text-red-800 px-2 py-1 rounded hover:bg-red-50"
+                          title="Excluir"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {usuarios.length === 0 && (
+            <p className="text-center text-gray-500 py-8">Nenhum usuário cadastrado</p>
+          )}
         </div>
 
         {/* Seção de Configurações */}
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          padding: '2rem',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
-          <h2 style={{ color: '#cc0d2e', marginBottom: '1.5rem' }}>
-            ⚙️ Configurações do Sistema
-          </h2>
-
-          <div style={{ display: 'grid', gap: '1.5rem' }}>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">⚙️ Configurações do Sistema</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {configuracoes.map((config) => (
-              <div key={config.chave} style={{
-                padding: '1rem',
-                border: '1px solid #ddd',
-                borderRadius: '8px'
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <strong style={{ color: '#333' }}>{config.chave}</strong>
-                    <p style={{ margin: '0.5rem 0 0 0', color: '#666', fontSize: '0.9rem' }}>
-                      {config.descricao}
-                    </p>
-                  </div>
-                  <div style={{
-                    padding: '0.5rem 1rem',
-                    background: '#f5f5f5',
-                    borderRadius: '6px',
-                    fontWeight: 'bold',
-                    color: '#cc0d2e'
-                  }}>
-                    {config.valor}
-                  </div>
-                </div>
+              <div key={config.chave} className="border rounded p-4">
+                <h3 className="font-semibold text-gray-800 mb-1">{config.descricao}</h3>
+                <p className="text-2xl font-bold text-red-600">{config.valor}</p>
+                <p className="text-xs text-gray-500 mt-1">Chave: {config.chave}</p>
               </div>
             ))}
           </div>
 
-          <div style={{
-            marginTop: '2rem',
-            padding: '1rem',
-            background: '#fff3cd',
-            borderRadius: '8px',
-            border: '1px solid #ffc107'
-          }}>
-            <p style={{ margin: 0, color: '#856404', fontSize: '0.9rem' }}>
-              ℹ️ <strong>Nota:</strong> Para alterar as configurações, use as rotas da API ou atualize diretamente no banco de dados.
-            </p>
-          </div>
+          {configuracoes.length === 0 && (
+            <p className="text-center text-gray-500 py-8">Nenhuma configuração disponível</p>
+          )}
         </div>
       </div>
 
-      {/* Modal de Redefinir Senha */}
-      {mostrarModalRedefinir && (
-        <ModalRedefinirSenha onClose={() => setMostrarModalRedefinir(false)} />
-      )}
+      {/* Modais */}
+      <ModalRedefinirSenha
+        isOpen={mostrarModalRedefinir}
+        onClose={() => setMostrarModalRedefinir(false)}
+      />
+
+      <ModalAdicionarUsuario
+        isOpen={mostrarModalAdicionar}
+        onClose={() => setMostrarModalAdicionar(false)}
+        onSuccess={handleSuccessModal}
+      />
+
+      <ModalEditarUsuario
+        isOpen={mostrarModalEditar}
+        usuario={usuarioSelecionado}
+        onClose={() => {
+          setMostrarModalEditar(false);
+          setUsuarioSelecionado(null);
+        }}
+        onSuccess={handleSuccessModal}
+      />
+
+      <ModalExcluirUsuario
+        isOpen={mostrarModalExcluir}
+        usuario={usuarioSelecionado}
+        onClose={() => {
+          setMostrarModalExcluir(false);
+          setUsuarioSelecionado(null);
+        }}
+        onSuccess={handleSuccessModal}
+      />
     </div>
   );
 }
