@@ -1,13 +1,13 @@
 -- Schema do Banco de Dados - Sistema de Autorizações SC Internacional
 -- Versão 2.0 - Com código único para atletas (sem login)
 
--- Tabela de usuários (apenas staff: supervisores, serviço social, monitor, admin)
+-- Tabela de usuários (atletas e staff: atletas, supervisores, serviço social, monitor, admin)
 CREATE TABLE IF NOT EXISTS usuarios (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   senha_hash TEXT NOT NULL,
   nome TEXT NOT NULL,
-  perfil TEXT NOT NULL CHECK(perfil IN ('supervisor', 'servicosocial', 'monitor', 'admin')),
+  perfil TEXT NOT NULL CHECK(perfil IN ('atleta', 'supervisor', 'servicosocial', 'monitor', 'admin')),
   categoria TEXT CHECK(categoria IN ('Sub14', 'Sub15', 'Sub16', 'Sub17', 'Sub20')),
   ativo INTEGER DEFAULT 1,
   criado_em TEXT DEFAULT (datetime('now')),
