@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Alert from '../components/Alert';
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
+
 export default function Solicitar() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -30,9 +32,19 @@ export default function Solicitar() {
     setLoading(true);
 
     try {
-      const response = await fetch('http://127.0.0.1:8787/api/publico/solicitar', {
+      const token = localStorage.getItem('token');
+      
+      if (!token) {
+        navigate('/login-atleta');
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/atleta/solicitar`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json' 
+        },
         body: JSON.stringify(dados)
       });
 
