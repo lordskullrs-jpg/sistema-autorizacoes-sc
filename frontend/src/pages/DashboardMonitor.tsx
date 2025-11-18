@@ -52,7 +52,7 @@ export default function DashboardMonitor() {
     setErro('');
     try {
       const response = await fetch(
-        `${API_URL}/api/relatorio-chamada?data=${dataConsulta}&hora=${horaConsulta}`,
+        `${API_URL}/api/solicitacoes/relatorio-chamada?data=${dataConsulta}&hora=${horaConsulta}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
