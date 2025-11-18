@@ -37,12 +37,41 @@ export default function DashboardMonitor() {
   const [observacao, setObservacao] = useState('');
   const [processando, setProcessando] = useState(false);
   const [filtro, setFiltro] = useState<string>('todos');
+  const [mostrarRelatorio, setMostrarRelatorio] = useState(false);
+  const [relatorioData, setRelatorioData] = useState<any>(null);
+  const [dataConsulta, setDataConsulta] = useState(new Date().toISOString().split('T')[0]);
+  const [horaConsulta, setHoraConsulta] = useState(new Date().toTimeString().split(' ')[0].substring(0, 5));
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskullrs-jpg.workers.dev';
 
   useEffect(() => {
     carregarSolicitacoes();
   }, []);
+
+  const buscarRelatorioChamada = async () => {
+    setErro('');
+    try {
+      const response = await fetch(
+        `${API_URL}/api/solicitacoes/relatorio-chamada?data=${dataConsulta}&hora=${horaConsulta}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Erro ao buscar relatório');
+      }
+
+      setRelatorioData(result);
+      setMostrarRelatorio(true);
+    } catch (error: any) {
+      setErro(error.message);
+    }
+  };
 
   const carregarSolicitacoes = async () => {
     try {
@@ -318,6 +347,21 @@ export default function DashboardMonitor() {
             <strong>⚠️ Importante:</strong> Registre as saídas e retornos assim que acontecerem 
             para manter o controle atualizado.
           </div>
+          
+          {/* Botão de Relatório de Chamada */}
+          <div style={{ marginTop: '20px', textAlign: 'center' }}>
+            <button
+              onClick={() => {
+                setDataConsulta(new Date().toISOString().split('T')[0]);
+                setHoraConsulta(new Date().toTimeString().split(' ')[0].substring(0, 5));
+                buscarRelatorioChamada();
+              }}
+              className="btn-dashboard btn-primary"
+              style={{ maxWidth: '400px' }}
+            >
+              📋 Gerar Relatório de Chamada
+            </button>
+          </div>
         </DashboardCard>
 
         {/* Estatísticas */}
@@ -428,6 +472,157 @@ export default function DashboardMonitor() {
           )}
         </DashboardCard>
       </div>
+
+      {/* Modal de Relatório de Chamada */}
+      {mostrarRelatorio && relatorioData && (
+        <div className="modal-overlay" onClick={() => setMostrarRelatorio(false)}>
+          <div className="modal-content modal-large" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>📋 Relatório de Chamada</h2>
+              <button className="modal-close" onClick={() => setMostrarRelatorio(false)}>×</button>
+            </div>
+
+            <div className="modal-body">
+              {/* Filtros de Data/Hora */}
+              <div style={{ marginBottom: '25px', padding: '20px', background: '#f8f9fa', borderRadius: '8px' }}>
+                <h3 style={{ marginBottom: '15px', color: '#C8102E' }}>📅 Consultar Data/Hora</h3>
+                <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'end' }}>
+                  <div style={{ flex: '1', minWidth: '200px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Data:</label>
+                    <input
+                      type="date"
+                      value={dataConsulta}
+                      onChange={(e) => setDataConsulta(e.target.value)}
+                      style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ced4da' }}
+                    />
+                  </div>
+                  <div style={{ flex: '1', minWidth: '200px' }}>
+                    <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>Hora:</label>
+                    <input
+                      type="time"
+                      value={horaConsulta}
+                      onChange={(e) => setHoraConsulta(e.target.value)}
+                      style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ced4da' }}
+                    />
+                  </div>
+                  <button
+                    onClick={buscarRelatorioChamada}
+                    className="btn-dashboard btn-primary"
+                    style={{ padding: '10px 30px', height: 'fit-content' }}
+                  >
+                    🔄 Atualizar
+                  </button>
+                </div>
+              </div>
+
+              {/* Resumo */}
+              <div style={{ marginBottom: '25px', padding: '15px', background: '#d4edda', borderRadius: '8px', border: '1px solid #28a745' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#155724' }}>
+                  📊 Resumo da Consulta
+                </h3>
+                <p style={{ margin: '5px 0', color: '#155724' }}>
+                  <strong>Data/Hora:</strong> {new Date(`${relatorioData.dataConsulta}T${relatorioData.horaConsulta}`).toLocaleString('pt-BR')}
+                </p>
+                <p style={{ margin: '5px 0', color: '#155724' }}>
+                  <strong>Total de atletas autorizados a estar fora:</strong> {relatorioData.totalAtletas}
+                </p>
+              </div>
+
+              {/* Lista de Atletas */}
+              {relatorioData.totalAtletas === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#6c757d' }}>
+                  <p style={{ fontSize: '1.1rem' }}>✅ Todos os atletas devem estar no alojamento neste horário!</p>
+                </div>
+              ) : (
+                <div>
+                  <h3 style={{ marginBottom: '15px', color: '#C8102E' }}>🏃 Atletas Autorizados a Estar Fora:</h3>
+                  {relatorioData.atletas.map((atleta: any, index: number) => (
+                    <div
+                      key={index}
+                      style={{
+                        marginBottom: '15px',
+                        padding: '20px',
+                        background: 'white',
+                        border: `2px solid ${
+                          atleta.statusAtual === 'ATRASADO' ? '#dc3545' :
+                          atleta.statusAtual === 'RETORNOU' ? '#28a745' :
+                          atleta.statusAtual === 'SAIU' ? '#ffc107' : '#6c757d'
+                        }`,
+                        borderRadius: '8px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '12px' }}>
+                        <div>
+                          <h4 style={{ margin: '0 0 5px 0', color: '#495057' }}>{atleta.nome}</h4>
+                          <span className="category-badge">{atleta.categoria}</span>
+                        </div>
+                        <span
+                          style={{
+                            padding: '6px 14px',
+                            borderRadius: '12px',
+                            fontWeight: '600',
+                            fontSize: '0.85rem',
+                            background:
+                              atleta.statusAtual === 'ATRASADO' ? '#f8d7da' :
+                              atleta.statusAtual === 'RETORNOU' ? '#d4edda' :
+                              atleta.statusAtual === 'SAIU' ? '#fff3cd' : '#e9ecef',
+                            color:
+                              atleta.statusAtual === 'ATRASADO' ? '#721c24' :
+                              atleta.statusAtual === 'RETORNOU' ? '#155724' :
+                              atleta.statusAtual === 'SAIU' ? '#856404' : '#495057'
+                          }}
+                        >
+                          {atleta.statusAtual === 'ATRASADO' ? '⚠️ ATRASADO' :
+                           atleta.statusAtual === 'RETORNOU' ? '✅ RETORNOU' :
+                           atleta.statusAtual === 'SAIU' ? '🚶 SAIU' :
+                           atleta.statusAtual === 'AGUARDANDO_SAIDA' ? '⏳ AGUARDANDO' : '🚫 FORA'}
+                        </span>
+                      </div>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                        <div>
+                          <strong style={{ color: '#6c757d', fontSize: '0.85rem' }}>Saída:</strong>
+                          <p style={{ margin: '4px 0', color: '#495057' }}>
+                            {new Date(`${atleta.data_saida}T${atleta.horario_saida}`).toLocaleString('pt-BR')}
+                          </p>
+                        </div>
+                        <div>
+                          <strong style={{ color: '#6c757d', fontSize: '0.85rem' }}>Retorno Previsto:</strong>
+                          <p style={{ margin: '4px 0', color: '#495057' }}>
+                            {new Date(`${atleta.data_retorno}T${atleta.horario_retorno}`).toLocaleString('pt-BR')}
+                          </p>
+                        </div>
+                        <div>
+                          <strong style={{ color: '#6c757d', fontSize: '0.85rem' }}>Motivo:</strong>
+                          <p style={{ margin: '4px 0', color: '#495057' }}>{atleta.motivo_destino}</p>
+                        </div>
+                      </div>
+
+                      {atleta.observacaoStatus && (
+                        <div style={{ padding: '10px', background: '#f8f9fa', borderRadius: '6px', marginTop: '10px' }}>
+                          <strong style={{ color: '#6c757d', fontSize: '0.85rem' }}>Status:</strong>
+                          <p style={{ margin: '4px 0', color: '#495057' }}>{atleta.observacaoStatus}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Botão Imprimir */}
+              <div style={{ marginTop: '25px', textAlign: 'center' }}>
+                <button
+                  onClick={() => window.print()}
+                  className="btn-dashboard btn-secondary"
+                  style={{ maxWidth: '300px' }}
+                >
+                  🖨️ Imprimir Relatório
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
