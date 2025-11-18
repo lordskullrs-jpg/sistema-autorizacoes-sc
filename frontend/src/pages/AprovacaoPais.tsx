@@ -116,11 +116,16 @@ export default function AprovacaoPais() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', padding: '2rem', background: 'linear-gradient(135deg, #cc0d2e 0%, #a00a25 100%)' }}>
+    <div style={{ minHeight: '100vh', padding: '2rem', background: '#f5f5f5' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', color: 'white', marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔴 SC Internacional</h1>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 'normal' }}>Autorização de Saída</h2>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <img 
+            src="https://imgur.com/HIsH9X5.png" 
+            alt="Serviço Social SC Internacional" 
+            style={{ width: '120px', height: 'auto', marginBottom: '1rem' }}
+          />
+          <h2 style={{ fontSize: '1.2rem', color: '#333', marginBottom: '0.5rem', fontWeight: '600' }}>Departamento de Serviço Social</h2>
+          <h3 style={{ fontSize: '1rem', color: '#666', fontWeight: 'normal' }}>Sistema de Autorizações</h3>
         </div>
 
         <Card title="👨‍👩‍👦 Aprovação dos Pais/Responsáveis">
