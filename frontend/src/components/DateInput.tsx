@@ -6,8 +6,6 @@ interface DateInputProps {
   label: string;
   required?: boolean;
   disabled?: boolean;
-  min?: string;
-  max?: string;
 }
 
 export default function DateInput({ 
@@ -15,9 +13,7 @@ export default function DateInput({
   onChange, 
   label, 
   required = false, 
-  disabled = false,
-  min,
-  max
+  disabled = false
 }: DateInputProps) {
   const [displayValue, setDisplayValue] = useState('');
 

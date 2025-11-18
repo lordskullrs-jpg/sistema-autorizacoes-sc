@@ -26,7 +26,7 @@ export default function Consultar() {
     setSolicitacao(null);
 
     try {
-      const result = await api.consultarPublico(codigo);
+      const result: any = await api.consultarPublico(codigo);
       setSolicitacao(result.solicitacao);
     } catch (error: any) {
       setErro(error.message || 'Código não encontrado');
