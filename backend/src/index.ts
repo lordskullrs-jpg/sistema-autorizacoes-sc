@@ -60,22 +60,25 @@ app.get('/api-status', (c) => {
 });
 
 // Registrar rotas
-app.route('/publico', publico);  // Rotas públicas (consulta)
+app.route('/api/publico', publico);  // Rotas públicas (consulta)
 app.route('/api/auth', auth);       // Autenticação
 
 // Aplicar middleware de autenticação nas rotas protegidas de atletas
-app.use('/atleta/*', authMiddleware);
-app.route('/atleta', atleta);    // Rotas protegidas de atletas (requer auth)
+app.use('/api/atleta/*', authMiddleware);
+app.route('/api/atleta', atleta);    // Rotas protegidas de atletas (requer auth)
 
-app.route('/solicitacoes', solicitacoes);  // Solicitações (staff)
-app.route('/aprovacao-pais', aprovacao);  // Aprovação pais
+// Aplicar middleware de autenticação nas rotas de solicitações
+app.use('/api/solicitacoes/*', authMiddleware);
+app.route('/api/solicitacoes', solicitacoes);  // Solicitações (staff)
+
+app.route('/api/aprovacao-pais', aprovacao);  // Aprovação pais
 
 // Rotas de admin (requer auth de admin)
-app.use('/admin/*', authMiddleware);
-app.route('/admin', admin);
+app.use('/api/admin/*', authMiddleware);
+app.route('/api/admin', admin);
 
 // Rotas de redefinição de senha (públicas)
-app.route('/reset-password', resetPassword);
+app.route('/api/reset-password', resetPassword);
 
 // Exportar aplicação
 export default app;

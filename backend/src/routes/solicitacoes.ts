@@ -5,8 +5,7 @@ import { authMiddleware, requirePerfil } from '../middleware/auth';
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Todas as rotas requerem autenticação (staff apenas)
-app.use('/*', authMiddleware);
+// Middleware de autenticação aplicado no index.ts
 
 /**
  * GET /api/solicitacoes

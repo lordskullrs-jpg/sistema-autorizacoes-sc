@@ -105,15 +105,15 @@ export const api = {
 
   // Aprovação dos pais
   validarTokenPais: (token: string) =>
-    request(`/api/aprovacao/${token}`),
+    request(`/api/aprovacao-pais/${token}`),
 
   aprovarPais: (token: string, aprovado: boolean, observacao?: string) =>
-    request(`/api/aprovacao/${token}`, {
+    request(`/api/aprovacao-pais/${token}`, {
       method: 'POST',
       body: JSON.stringify({ aprovado, observacao }),
     }),
 
   // Consulta pública
   consultarPublico: (codigo: string) =>
-    request(`/publico/consultar/${codigo}`),
+    request(`/api/publico/consultar/${codigo}`),
 };
