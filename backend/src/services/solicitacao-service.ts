@@ -152,7 +152,9 @@ export class SolicitacaoService {
   async aprovarSupervisor(
     solicitacaoId: string,
     supervisorId: string,
-    dados: AprovarSupervisorDTO
+    dados: AprovarSupervisorDTO,
+    ip?: string,
+    userAgent?: string
   ): Promise<Solicitacao | null> {
     const solicitacao = await this.buscarPorId(solicitacaoId);
     if (!solicitacao) return null;
@@ -168,6 +170,8 @@ export class SolicitacaoService {
           observacao_supervisor = ?,
           aprovado_supervisor_em = ?,
           aprovado_supervisor_por = ?,
+          aprovado_supervisor_ip = ?,
+          aprovado_supervisor_dispositivo = ?,
           status_geral = ?,
           status_final = ?,
           atualizado_em = ?
@@ -178,6 +182,8 @@ export class SolicitacaoService {
         dados.observacao || null,
         agora,
         supervisorId,
+        ip || 'N/A',
+        userAgent || 'N/A',
         statusGeral,
         statusFinal,
         agora,
@@ -219,7 +225,7 @@ export class SolicitacaoService {
   /**
    * Aprova/reprova solicitação pelos pais
    */
-  async aprovarPais(token: string, dados: AprovarPaisDTO): Promise<Solicitacao | null> {
+  async aprovarPais(token: string, dados: AprovarPaisDTO, ip?: string, userAgent?: string): Promise<Solicitacao | null> {
     // Buscar solicitação pelo token
     const solicitacaoId = await this.env.SESSIONS.get(`aprovacao_pais:${token}`);
     if (!solicitacaoId) return null;
@@ -246,6 +252,8 @@ export class SolicitacaoService {
       SET status_pais = ?,
           observacao_pais = ?,
           aprovado_pais_em = ?,
+          aprovado_pais_ip = ?,
+          aprovado_pais_dispositivo = ?,
           status_geral = ?,
           status_final = ?,
           atualizado_em = ?
@@ -255,6 +263,8 @@ export class SolicitacaoService {
         statusPais,
         dados.observacao || null,
         agora,
+        ip || 'N/A',
+        userAgent || 'N/A',
         statusGeral,
         statusFinal,
         agora,

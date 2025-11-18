@@ -110,6 +110,10 @@ app.put('/:id/supervisor', requirePerfil('supervisor'), async (c) => {
     
     const agora = new Date().toISOString();
     
+    // Capturar dados de auditoria LGPD
+    const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'N/A';
+    const userAgent = c.req.header('user-agent') || 'N/A';
+    
     if (dados.aprovado) {
       // APROVAR - processo continua
       const updateStmt = c.env.DB.prepare(`
@@ -118,6 +122,8 @@ app.put('/:id/supervisor', requirePerfil('supervisor'), async (c) => {
           observacao_supervisor = ?,
           aprovado_supervisor_em = ?,
           aprovado_supervisor_por = ?,
+          aprovado_supervisor_ip = ?,
+          aprovado_supervisor_dispositivo = ?,
           status_geral = 'Aprovado pelo Supervisor',
           atualizado_em = ?
         WHERE id = ?
@@ -127,6 +133,8 @@ app.put('/:id/supervisor', requirePerfil('supervisor'), async (c) => {
         dados.observacao || null,
         agora,
         user.userId,
+        ip,
+        userAgent,
         agora,
         id
       ).run();
@@ -149,6 +157,8 @@ app.put('/:id/supervisor', requirePerfil('supervisor'), async (c) => {
           observacao_supervisor = ?,
           aprovado_supervisor_em = ?,
           aprovado_supervisor_por = ?,
+          aprovado_supervisor_ip = ?,
+          aprovado_supervisor_dispositivo = ?,
           status_geral = 'Reprovado pelo Supervisor',
           status_final = 'Reprovado',
           atualizado_em = ?
@@ -159,6 +169,8 @@ app.put('/:id/supervisor', requirePerfil('supervisor'), async (c) => {
         dados.observacao,
         agora,
         user.userId,
+        ip,
+        userAgent,
         agora,
         id
       ).run();
@@ -286,6 +298,10 @@ app.put('/:id/servico-social', requirePerfil('servicosocial'), async (c) => {
     
     const agora = new Date().toISOString();
     
+    // Capturar dados de auditoria LGPD
+    const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'N/A';
+    const userAgent = c.req.header('user-agent') || 'N/A';
+    
     if (dados.aprovado) {
       // APROVAR FINAL - vai para monitor
       const updateStmt = c.env.DB.prepare(`
@@ -294,6 +310,8 @@ app.put('/:id/servico-social', requirePerfil('servicosocial'), async (c) => {
           observacao_servico_social = ?,
           aprovado_servico_social_em = ?,
           aprovado_servico_social_por = ?,
+          aprovado_servico_social_ip = ?,
+          aprovado_servico_social_dispositivo = ?,
           status_geral = 'Aprovado - Aguardando Saída',
           status_final = 'Aprovado',
           atualizado_em = ?
@@ -304,6 +322,8 @@ app.put('/:id/servico-social', requirePerfil('servicosocial'), async (c) => {
         dados.observacao || null,
         agora,
         user.userId,
+        ip,
+        userAgent,
         agora,
         id
       ).run();
@@ -326,6 +346,8 @@ app.put('/:id/servico-social', requirePerfil('servicosocial'), async (c) => {
           observacao_servico_social = ?,
           aprovado_servico_social_em = ?,
           aprovado_servico_social_por = ?,
+          aprovado_servico_social_ip = ?,
+          aprovado_servico_social_dispositivo = ?,
           status_geral = 'Reprovado pelo Serviço Social',
           status_final = 'Reprovado',
           atualizado_em = ?
@@ -336,6 +358,8 @@ app.put('/:id/servico-social', requirePerfil('servicosocial'), async (c) => {
         dados.observacao,
         agora,
         user.userId,
+        ip,
+        userAgent,
         agora,
         id
       ).run();

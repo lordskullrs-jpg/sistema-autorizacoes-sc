@@ -25,7 +25,14 @@ interface Solicitacao {
   status_geral: string;
   status_final: string;
   observacao_supervisor?: string;
+  observacao_pais?: string;
   observacao_servico_social?: string;
+  aprovado_supervisor_em?: string;
+  aprovado_supervisor_ip?: string;
+  aprovado_supervisor_dispositivo?: string;
+  aprovado_pais_em?: string;
+  aprovado_pais_ip?: string;
+  aprovado_pais_dispositivo?: string;
   link_aprovacao_pais?: string;
   token_pais?: string;
   token_pais_expira_em?: string;
@@ -318,23 +325,56 @@ export default function DashboardServicoSocial() {
             <div className="info-section">
               <h3>✅ Histórico de Aprovações</h3>
               <div className="approval-history">
-                <div className="approval-item">
-                  <span className="approval-label">Supervisor ({solicitacaoSelecionada.categoria}):</span>
-                  <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_supervisor)}`}>
-                    {solicitacaoSelecionada.status_supervisor}
-                  </span>
-                </div>
-                {solicitacaoSelecionada.observacao_supervisor && (
-                  <div className="approval-obs">
-                    <strong>Observação:</strong> {solicitacaoSelecionada.observacao_supervisor}
+                {/* Supervisor */}
+                <div className="approval-item" style={{marginBottom: '1rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
+                    <span className="approval-label"><strong>👤 Supervisor ({solicitacaoSelecionada.categoria}):</strong></span>
+                    <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_supervisor)}`}>
+                      {solicitacaoSelecionada.status_supervisor}
+                    </span>
                   </div>
-                )}
+                  {solicitacaoSelecionada.aprovado_supervisor_em && (
+                    <div style={{fontSize: '0.85rem', color: '#666', marginTop: '0.5rem'}}>
+                      <div>📅 <strong>Data/Hora:</strong> {new Date(solicitacaoSelecionada.aprovado_supervisor_em).toLocaleString('pt-BR')}</div>
+                      {solicitacaoSelecionada.aprovado_supervisor_ip && (
+                        <div>🌐 <strong>IP:</strong> {solicitacaoSelecionada.aprovado_supervisor_ip}</div>
+                      )}
+                      {solicitacaoSelecionada.aprovado_supervisor_dispositivo && (
+                        <div>📱 <strong>Dispositivo:</strong> {solicitacaoSelecionada.aprovado_supervisor_dispositivo.substring(0, 80)}...</div>
+                      )}
+                    </div>
+                  )}
+                  {solicitacaoSelecionada.observacao_supervisor && (
+                    <div className="approval-obs" style={{marginTop: '0.5rem', padding: '0.5rem', background: '#fff', borderRadius: '4px'}}>
+                      <strong>Observação:</strong> {solicitacaoSelecionada.observacao_supervisor}
+                    </div>
+                  )}
+                </div>
                 
-                <div className="approval-item">
-                  <span className="approval-label">Pais/Responsáveis:</span>
-                  <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_pais)}`}>
-                    {solicitacaoSelecionada.status_pais}
-                  </span>
+                {/* Pais/Responsáveis */}
+                <div className="approval-item" style={{marginBottom: '1rem', padding: '1rem', background: '#f9f9f9', borderRadius: '8px'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem'}}>
+                    <span className="approval-label"><strong>👨‍👩‍👧 Pais/Responsáveis:</strong></span>
+                    <span className={`status-badge ${getStatusBadgeClass(solicitacaoSelecionada.status_pais)}`}>
+                      {solicitacaoSelecionada.status_pais}
+                    </span>
+                  </div>
+                  {solicitacaoSelecionada.aprovado_pais_em && (
+                    <div style={{fontSize: '0.85rem', color: '#666', marginTop: '0.5rem'}}>
+                      <div>📅 <strong>Data/Hora:</strong> {new Date(solicitacaoSelecionada.aprovado_pais_em).toLocaleString('pt-BR')}</div>
+                      {solicitacaoSelecionada.aprovado_pais_ip && (
+                        <div>🌐 <strong>IP:</strong> {solicitacaoSelecionada.aprovado_pais_ip}</div>
+                      )}
+                      {solicitacaoSelecionada.aprovado_pais_dispositivo && (
+                        <div>📱 <strong>Dispositivo:</strong> {solicitacaoSelecionada.aprovado_pais_dispositivo.substring(0, 80)}...</div>
+                      )}
+                    </div>
+                  )}
+                  {solicitacaoSelecionada.observacao_pais && (
+                    <div className="approval-obs" style={{marginTop: '0.5rem', padding: '0.5rem', background: '#fff', borderRadius: '4px'}}>
+                      <strong>Observação dos Pais:</strong> {solicitacaoSelecionada.observacao_pais}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

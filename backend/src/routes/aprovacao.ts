@@ -60,8 +60,12 @@ aprovacao.post('/:token', async (c) => {
       return c.json({ error: 'Campo "aprovado" é obrigatório' }, 400);
     }
 
+    // Capturar dados de auditoria LGPD
+    const ip = c.req.header('cf-connecting-ip') || c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'N/A';
+    const userAgent = c.req.header('user-agent') || 'N/A';
+
     const solicitacaoService = new SolicitacaoService(c.env);
-    const resultado = await solicitacaoService.aprovarPais(token, dados);
+    const resultado = await solicitacaoService.aprovarPais(token, dados, ip, userAgent);
 
     if (!resultado) {
       return c.json({ error: 'Link inválido ou expirado' }, 404);
