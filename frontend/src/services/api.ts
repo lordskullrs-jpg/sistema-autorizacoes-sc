@@ -112,4 +112,8 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ aprovado, observacao }),
     }),
+
+  // Consulta pública
+  consultarPublico: (codigo: string) =>
+    request(`/publico/consultar/${codigo}`),
 };

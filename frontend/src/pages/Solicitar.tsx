@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Alert from '../components/Alert';
+import DateInput from '../components/DateInput';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
 
@@ -83,18 +84,21 @@ export default function Solicitar() {
               }}>
                 {codigo}
               </div>
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <p style={{ fontSize: '0.95rem', color: '#6c757d', marginBottom: '2rem' }}>
+                Sua solicitação foi criada e está aguardando aprovação do supervisor.
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button 
-                  onClick={() => navigate(`/consultar?codigo=${codigo}`)}
+                  onClick={() => navigate('/dashboard')}
                   className="btn btn-primary"
                 >
-                  Consultar Agora
+                  🏠 Voltar ao Dashboard
                 </button>
                 <button 
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate(`/consultar?codigo=${codigo}`)}
                   className="btn btn-secondary"
                 >
-                  Voltar ao Início
+                  🔍 Consultar Status
                 </button>
               </div>
             </div>
@@ -138,17 +142,13 @@ export default function Solicitar() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">Data de Nascimento *</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={dados.data_nascimento}
-                  onChange={(e) => setDados({...dados, data_nascimento: e.target.value})}
-                  required
-                  disabled={loading}
-                />
-              </div>
+              <DateInput
+                label="Data de Nascimento"
+                value={dados.data_nascimento}
+                onChange={(value) => setDados({...dados, data_nascimento: value})}
+                required
+                disabled={loading}
+              />
 
               <div className="form-group">
                 <label className="form-label">Telefone *</label>
@@ -184,17 +184,13 @@ export default function Solicitar() {
             <h3 style={{ color: '#cc0d2e', marginTop: '2rem', marginBottom: '1rem' }}>Dados da Saída</h3>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div className="form-group">
-                <label className="form-label">Data de Saída *</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={dados.data_saida}
-                  onChange={(e) => setDados({...dados, data_saida: e.target.value})}
-                  required
-                  disabled={loading}
-                />
-              </div>
+              <DateInput
+                label="Data de Saída"
+                value={dados.data_saida}
+                onChange={(value) => setDados({...dados, data_saida: value})}
+                required
+                disabled={loading}
+              />
 
               <div className="form-group">
                 <label className="form-label">Horário de Saída *</label>
@@ -208,17 +204,13 @@ export default function Solicitar() {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Data de Retorno *</label>
-                <input
-                  type="date"
-                  className="form-control"
-                  value={dados.data_retorno}
-                  onChange={(e) => setDados({...dados, data_retorno: e.target.value})}
-                  required
-                  disabled={loading}
-                />
-              </div>
+              <DateInput
+                label="Data de Retorno"
+                value={dados.data_retorno}
+                onChange={(value) => setDados({...dados, data_retorno: value})}
+                required
+                disabled={loading}
+              />
 
               <div className="form-group">
                 <label className="form-label">Horário de Retorno *</label>

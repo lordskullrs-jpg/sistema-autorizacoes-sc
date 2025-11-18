@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import Alert from '../components/Alert';
+import { api } from '../services/api';
 
 export default function Consultar() {
   const [searchParams] = useSearchParams();
@@ -25,16 +26,10 @@ export default function Consultar() {
     setSolicitacao(null);
 
     try {
-      const response = await fetch(`http://127.0.0.1:8787/api/publico/consultar/${codigo}`);
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Código não encontrado');
-      }
-
+      const result = await api.consultarPublico(codigo);
       setSolicitacao(result.solicitacao);
     } catch (error: any) {
-      setErro(error.message);
+      setErro(error.message || 'Código não encontrado');
     } finally {
       setLoading(false);
     }

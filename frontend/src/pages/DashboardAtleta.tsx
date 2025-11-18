@@ -75,14 +75,14 @@ export default function DashboardAtleta() {
       {/* Footer */}
       <div className="dashboard-footer">
         <img 
-          src="https://i.imgur.com/odzcc03.png" 
-          alt="Logo SC Internacional" 
+          src="https://imgur.com/HIsH9X5.png" 
+          alt="Logo Serviço Social" 
           className="footer-logo"
         />
-        <p className="footer-text">Sistema de Autorizações Digitais</p>
+        <p className="footer-text">Sistema de gerenciamento de autorizações</p>
         <p className="footer-text">Departamento de Serviço Social</p>
         <p className="footer-text">Sport Club Internacional</p>
-        <p className="footer-copyright">© 2025 VampTech</p>
+        <p className="footer-copyright">© 2025 TechVamp</p>
       </div>
     </div>
   );
