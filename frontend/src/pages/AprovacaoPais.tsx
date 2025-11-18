@@ -21,7 +21,7 @@ export default function AprovacaoPais() {
 
   const carregarSolicitacao = async () => {
     try {
-      const response = await fetch(`${API_URL}/aprovacao-pais/${token}`);
+      const response = await fetch(`${API_URL}/api/aprovacao-pais/${token}`);
       const result = await response.json();
 
       if (!response.ok) {
@@ -46,7 +46,7 @@ export default function AprovacaoPais() {
     setErro('');
 
     try {
-      const response = await fetch(`${API_URL}/aprovacao-pais/${token}`, {
+      const response = await fetch(`${API_URL}/api/aprovacao-pais/${token}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
