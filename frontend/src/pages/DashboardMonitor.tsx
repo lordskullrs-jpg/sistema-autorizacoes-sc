@@ -166,6 +166,7 @@ export default function DashboardMonitor() {
     if (filtro === 'aguardando_saida') return s.status_geral === 'Aprovado - Aguardando Saída';
     if (filtro === 'saiu') return s.status_geral === 'Saiu';
     if (filtro === 'retornou') return s.status_geral === 'Retornou';
+    if (filtro === 'arquivado') return s.status_monitor === 'Arquivado';
     return true;
   });
 
@@ -173,6 +174,7 @@ export default function DashboardMonitor() {
     aguardandoSaida: solicitacoes.filter(s => s.status_geral === 'Aprovado - Aguardando Saída').length,
     saiu: solicitacoes.filter(s => s.status_geral === 'Saiu').length,
     retornou: solicitacoes.filter(s => s.status_geral === 'Retornou').length,
+    arquivado: solicitacoes.filter(s => s.status_monitor === 'Arquivado').length,
     total: solicitacoes.length
   };
 
@@ -420,6 +422,12 @@ export default function DashboardMonitor() {
             >
               Retornaram ({stats.retornou})
             </button>
+            <button 
+              className={`filter-btn ${filtro === 'arquivado' ? 'active' : ''}`}
+              onClick={() => setFiltro('arquivado')}
+            >
+              Arquivadas ({stats.arquivado})
+            </button>
           </div>
         </DashboardCard>
 
@@ -493,7 +501,7 @@ export default function DashboardMonitor() {
                       type="date"
                       value={dataConsulta}
                       onChange={(e) => setDataConsulta(e.target.value)}
-                      style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ced4da' }}
+                      style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ced4da', background: 'white', color: '#495057' }}
                     />
                   </div>
                   <div style={{ flex: '1', minWidth: '200px' }}>
@@ -502,7 +510,7 @@ export default function DashboardMonitor() {
                       type="time"
                       value={horaConsulta}
                       onChange={(e) => setHoraConsulta(e.target.value)}
-                      style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ced4da' }}
+                      style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ced4da', background: 'white', color: '#495057' }}
                     />
                   </div>
                   <button
