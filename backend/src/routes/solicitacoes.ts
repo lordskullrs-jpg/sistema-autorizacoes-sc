@@ -203,8 +203,8 @@ app.post('/:id/enviar-link-pais', requirePerfil('servicosocial'), async (c) => {
     expiraEm.setDate(expiraEm.getDate() + 7); // Expira em 7 dias
     
     const agora = new Date().toISOString();
-    const baseUrl = new URL(c.req.url).origin;
-    const linkAprovacao = `${baseUrl}/aprovacao-pais/${token}`;
+    const frontendUrl = 'https://sistema-autorizacoes-sc.pages.dev';
+    const linkAprovacao = `${frontendUrl}/aprovacao-pais/${token}`;
     
     // Atualizar banco
     const updateStmt = c.env.DB.prepare(`
@@ -232,6 +232,10 @@ app.post('/:id/enviar-link-pais', requirePerfil('servicosocial'), async (c) => {
     
     // Gerar mensagem WhatsApp
     const telefone = solicitacao.telefone_responsavel.replace(/\D/g, '');
+    
+    // Adicionar código do país (+55) se não tiver
+    const telefoneCompleto = telefone.startsWith('55') ? telefone : `55${telefone}`;
+    
     const mensagem = encodeURIComponent(
       `🔴 SC Internacional - Autorização de Saída\n\n` +
       `Olá! Seu filho(a) ${solicitacao.nome} solicitou autorização de saída.\n\n` +
@@ -242,7 +246,7 @@ app.post('/:id/enviar-link-pais', requirePerfil('servicosocial'), async (c) => {
       `${linkAprovacao}`
     );
     
-    const whatsappLink = `https://wa.me/${telefone}?text=${mensagem}`;
+    const whatsappLink = `https://wa.me/${telefoneCompleto}?text=${mensagem}`;
     
     return c.json({
       success: true,

@@ -43,6 +43,7 @@ export default function DashboardServicoSocial() {
   const [processando, setProcessando] = useState(false);
   const [filtro, setFiltro] = useState<string>('pendentes');
   const [linkWhatsApp, setLinkWhatsApp] = useState('');
+  const [linkAprovacao, setLinkAprovacao] = useState('');
 
   const API_URL = import.meta.env.VITE_API_URL || 'https://autorizacoes-backend.lordskull-rs.workers.dev';
 
@@ -97,6 +98,7 @@ export default function DashboardServicoSocial() {
       }
 
       setLinkWhatsApp(result.whatsapp_link);
+      setLinkAprovacao(result.link_aprovacao);
       setSucesso('✅ Link gerado com sucesso! Envie pelo WhatsApp.');
       await carregarSolicitacoes();
     } catch (error: any) {
@@ -229,6 +231,7 @@ export default function DashboardServicoSocial() {
               setErro('');
               setSucesso('');
               setLinkWhatsApp('');
+              setLinkAprovacao('');
             }}
             className="btn-back"
             disabled={processando}
@@ -373,19 +376,44 @@ export default function DashboardServicoSocial() {
             )}
 
             {/* Link recém-gerado via API */}
-            {linkWhatsApp && (
+            {linkWhatsApp && linkAprovacao && (
               <div className="alert alert-success" style={{padding: '1.5rem'}}>
                 <h4 style={{marginBottom: '1rem'}}>✅ Link Gerado com Sucesso!</h4>
-                <p style={{marginBottom: '1rem'}}>Envie este link para os pais via WhatsApp:</p>
-                <a 
-                  href={linkWhatsApp} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="btn btn-success"
-                  style={{width: '100%', display: 'block', textAlign: 'center'}}
-                >
-                  📱 Abrir WhatsApp
-                </a>
+                <p style={{marginBottom: '0.5rem', fontSize: '0.9rem', color: '#666'}}>Copie o link abaixo e envie para os pais:</p>
+                <div style={{
+                  background: '#f5f5f5',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  marginBottom: '1rem',
+                  wordBreak: 'break-all',
+                  fontSize: '0.85rem',
+                  fontFamily: 'monospace',
+                  border: '1px solid #ddd'
+                }}>
+                  {linkAprovacao}
+                </div>
+                <div style={{display: 'flex', gap: '0.5rem'}}>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(linkAprovacao);
+                      setSucesso('✅ Link copiado para a área de transferência!');
+                      setTimeout(() => setSucesso(''), 2000);
+                    }}
+                    className="btn"
+                    style={{flex: 1, background: '#6c757d', color: 'white', border: 'none'}}
+                  >
+                    📋 Copiar Link
+                  </button>
+                  <a 
+                    href={linkWhatsApp} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn btn-success"
+                    style={{flex: 1, textAlign: 'center', textDecoration: 'none'}}
+                  >
+                    📱 Abrir WhatsApp
+                  </a>
+                </div>
               </div>
             )}
 
