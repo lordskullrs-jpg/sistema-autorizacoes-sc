@@ -45,6 +45,103 @@ app.get('/', async (c) => {
 });
 
 /**
+ * GET /api/solicitacoes/relatorio-chamada
+ * Relatório de chamada para monitores
+ * Mostra quais atletas estão autorizados a estar fora em uma data/hora específica
+ */
+app.get('/relatorio-chamada', async (c) => {
+  try {
+    const user = c.get('user');
+    
+    // Apenas monitores e admins podem acessar
+    if (user.perfil !== 'monitor' && user.perfil !== 'admin') {
+      return c.json({ error: 'Acesso negado' }, 403);
+    }
+    
+    // Parâmetros de consulta
+    const dataConsulta = c.req.query('data') || new Date().toISOString().split('T')[0];
+    const horaConsulta = c.req.query('hora') || new Date().toTimeString().split(' ')[0].substring(0, 5);
+    
+    // Buscar todas as solicitações aprovadas pelo Serviço Social
+    const query = `
+      SELECT * FROM solicitacoes 
+      WHERE status_servico_social = 'Aprovado'
+      AND status_geral = 'Aprovado'
+      ORDER BY data_saida, horario_saida
+    `;
+    
+    const stmt = c.env.DB.prepare(query);
+    const result = await stmt.all();
+    const todasSolicitacoes = result.results || [];
+    
+    // Filtrar atletas que devem estar fora no momento da consulta
+    const dataHoraConsulta = new Date(`${dataConsulta}T${horaConsulta}:00`);
+    
+    const atletasFora = todasSolicitacoes.filter((sol: any) => {
+      const dataSaida = new Date(`${sol.data_saida}T${sol.horario_saida}:00`);
+      const dataRetorno = new Date(`${sol.data_retorno}T${sol.horario_retorno}:00`);
+      
+      // Atleta deve estar fora se a data/hora de consulta está entre saída e retorno
+      return dataHoraConsulta >= dataSaida && dataHoraConsulta <= dataRetorno;
+    });
+    
+    // Adicionar informações de status
+    const atletasComStatus = atletasFora.map((sol: any) => {
+      const dataRetorno = new Date(`${sol.data_retorno}T${sol.horario_retorno}:00`);
+      const agora = new Date();
+      
+      let statusAtual = 'FORA';
+      let observacaoStatus = '';
+      
+      // Verificar se já retornou
+      if (sol.retorno_confirmado_em) {
+        statusAtual = 'RETORNOU';
+        observacaoStatus = `Retornou em ${new Date(sol.retorno_confirmado_em).toLocaleString('pt-BR')}`;
+      }
+      // Verificar se está atrasado
+      else if (agora > dataRetorno) {
+        statusAtual = 'ATRASADO';
+        const minutosAtraso = Math.floor((agora.getTime() - dataRetorno.getTime()) / 60000);
+        if (minutosAtraso < 60) {
+          observacaoStatus = `Atrasado ${minutosAtraso} minutos`;
+        } else {
+          const horasAtraso = Math.floor(minutosAtraso / 60);
+          observacaoStatus = `Atrasado ${horasAtraso}h ${minutosAtraso % 60}min`;
+        }
+      }
+      // Verificar se saiu
+      else if (sol.saida_confirmada_em) {
+        statusAtual = 'SAIU';
+        observacaoStatus = `Saiu em ${new Date(sol.saida_confirmada_em).toLocaleString('pt-BR')}`;
+      }
+      // Aguardando saída
+      else {
+        statusAtual = 'AGUARDANDO_SAIDA';
+        observacaoStatus = 'Aguardando confirmação de saída';
+      }
+      
+      return {
+        ...sol,
+        statusAtual,
+        observacaoStatus
+      };
+    });
+    
+    return c.json({
+      success: true,
+      dataConsulta,
+      horaConsulta,
+      totalAtletas: atletasComStatus.length,
+      atletas: atletasComStatus
+    });
+    
+  } catch (error: any) {
+    console.error('Erro ao gerar relatório de chamada:', error);
+    return c.json({ error: 'Erro ao gerar relatório', details: error.message }, 500);
+  }
+});
+
+/**
  * GET /api/solicitacoes/:id
  * Busca solicitação por ID
  */
