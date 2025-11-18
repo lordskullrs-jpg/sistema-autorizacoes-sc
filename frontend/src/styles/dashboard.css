@@ -224,6 +224,154 @@
   color: #dc3545;
 }
 
+/* Botões de Filtro */
+.filter-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-btn {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.filter-btn.active {
+  background-color: #C8102E;
+  border-color: #C8102E;
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+}
+
+.filter-btn.active:hover {
+  background-color: #a00d25;
+}
+
+/* Tabelas de Dados */
+.table-responsive {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.data-table thead {
+  background-color: #C8102E;
+  color: white;
+}
+
+.data-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.data-table tbody tr {
+  transition: background-color 0.2s ease;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Células especiais */
+.code-cell {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #C8102E;
+  font-size: 0.9rem;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  background-color: #e9ecef;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status-badge.status-pendente,
+.status-badge.status-aguardando {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.status-aprovado {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-badge.status-reprovado {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-badge.status-retornou {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+/* Estado vazio */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6c757d;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 /* Filtros */
 .filters-section {
   display: flex;
